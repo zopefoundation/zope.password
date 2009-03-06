@@ -59,8 +59,8 @@ class PlainTextPasswordManager(object):
     def encodePassword(self, password):
         return password
 
-    def checkPassword(self, storedPassword, password):
-        return storedPassword == self.encodePassword(password)
+    def checkPassword(self, encoded_password, password):
+        return encoded_password == self.encodePassword(password)
 
 
 class SSHAPasswordManager(PlainTextPasswordManager):
@@ -123,10 +123,10 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return '{SSHA}' + urlsafe_b64encode(
             hash.digest() + salt)
 
-    def checkPassword(self, storedPassword, password):
-        byte_string = urlsafe_b64decode(storedPassword[6:])
+    def checkPassword(self, encoded_password, password):
+        byte_string = urlsafe_b64decode(encoded_password[6:])
         salt = byte_string[20:]
-        return storedPassword == self.encodePassword(password, salt)
+        return encoded_password == self.encodePassword(password, salt)
 
 
 class MD5PasswordManager(PlainTextPasswordManager):
@@ -169,12 +169,12 @@ class MD5PasswordManager(PlainTextPasswordManager):
             salt = "%08x" % randint(0, 0xffffffff)
         return '{MD5}%s%s' % (salt, md5(_encoder(password)[0]).hexdigest())
 
-    def checkPassword(self, storedPassword, password):
-        if storedPassword.startswith('{MD5}'):
-            salt = storedPassword[5:-32]
-            return storedPassword == self.encodePassword(password, salt)
-        salt = storedPassword[:-32]
-        return storedPassword == self.encodePassword(password, salt)[5:]
+    def checkPassword(self, encoded_password, password):
+        if encoded_password.startswith('{MD5}'):
+            salt = encoded_password[5:-32]
+            return encoded_password == self.encodePassword(password, salt)
+        salt = encoded_password[:-32]
+        return encoded_password == self.encodePassword(password, salt)[5:]
 
 
 class SHA1PasswordManager(PlainTextPasswordManager):
@@ -217,9 +217,9 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             salt = "%08x" % randint(0, 0xffffffff)
         return '{SHA1}%s%s' % (salt, sha1(_encoder(password)[0]).hexdigest())
 
-    def checkPassword(self, storedPassword, password):
-        if storedPassword.startswith('{SHA1}'):
-            salt = storedPassword[6:-40]
-            return storedPassword == self.encodePassword(password, salt)
-        salt = storedPassword[:-40]
-        return storedPassword == self.encodePassword(password, salt)[6:]
+    def checkPassword(self, encoded_password, password):
+        if encoded_password.startswith('{SHA1}'):
+            salt = encoded_password[6:-40]
+            return encoded_password == self.encodePassword(password, salt)
+        salt = encoded_password[:-40]
+        return encoded_password == self.encodePassword(password, salt)[6:]

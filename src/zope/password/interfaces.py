@@ -23,5 +23,5 @@ class IPasswordManager(zope.interface.Interface):
     def encodePassword(password):
         """Return encoded data for the password."""
 
-    def checkPassword(storedPassword, password):
-        """Return whether the password coincide with the storedPassword."""
+    def checkPassword(encoded_password, password):
+        """Return whether the password coincide with the encoded data."""

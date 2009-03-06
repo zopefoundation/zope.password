@@ -30,6 +30,10 @@
       factory=".password.SHA1PasswordManager"
       />
 
+  <class class=".password.SSHAPasswordManager">
+    <allow interface=".interfaces.IPasswordManager" />
+  </class>
+
   <utility
       name="SSHA"
       provides=".interfaces.IPasswordManager"
