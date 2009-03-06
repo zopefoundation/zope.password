@@ -24,7 +24,7 @@ setup(name='zope.password',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
       long_description=(
-        open('README.txt').read(),
+        open('README.txt').read()
         + '\n\n' +
         open('CHANGES.txt').read()
         ),
