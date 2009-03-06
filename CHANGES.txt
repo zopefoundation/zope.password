@@ -1,0 +1,10 @@
+=======
+CHANGES
+=======
+
+3.5.0 (unreleased)
+------------------
+
+First release. This package was splitted off from ``zope.app.authentication``
+to separate password manager functionality that is greatly re-usable without
+any bit of ``zope.app.authentication`` and to reduce its dependencies.
