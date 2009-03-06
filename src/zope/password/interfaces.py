@@ -18,10 +18,10 @@ $Id$
 import zope.interface
 
 class IPasswordManager(zope.interface.Interface):
-    """Password manager."""
+    """Password manager"""
 
     def encodePassword(password):
-        """Return encoded data for the password."""
+        """Return encoded data for the given password"""
 
     def checkPassword(encoded_password, password):
-        """Return whether the password coincide with the encoded data."""
+        """Return whether the given encoded data coincide with the given password"""
