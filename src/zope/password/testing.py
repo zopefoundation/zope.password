@@ -25,6 +25,20 @@ from zope.password.password import SSHAPasswordManager
 
 
 def setUpPasswordManagers():
+    """Helper function for setting up password manager utilities for tests
+    
+    >>> from zope.component import getUtility
+    >>> setUpPasswordManagers()
+    >>> getUtility(IPasswordManager, 'Plain Text')
+    <zope.password.password.PlainTextPasswordManager object at 0x...>
+    >>> getUtility(IPasswordManager, 'SSHA')
+    <zope.password.password.SSHAPasswordManager object at 0x...>
+    >>> getUtility(IPasswordManager, 'MD5')
+    <zope.password.password.MD5PasswordManager object at 0x...>
+    >>> getUtility(IPasswordManager, 'SHA1')
+    <zope.password.password.SHA1PasswordManager object at 0x...>
+    
+    """
     provideUtility(PlainTextPasswordManager(), IPasswordManager, 'Plain Text')
     provideUtility(SSHAPasswordManager(), IPasswordManager, 'SSHA')
     provideUtility(MD5PasswordManager(), IPasswordManager, 'MD5')

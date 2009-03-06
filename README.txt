@@ -23,8 +23,7 @@ interface, this package also provides four implementations:
    incorporates a salt into the password when encoding it. This password manager
    is compatible with passwords used in LDAP databases.
 
-It is strongly recommended to use SSHAPasswordManager, as it's the most secure
-one.
+It is strongly recommended to use SSHAPasswordManager, as it's the most secure.
 
 Usage
 -----
@@ -33,7 +32,9 @@ It's very easy to use password managers. The ``zope.password.interfaces.IPasswor
 interface defines only two methods::
 
   def encodePassword(password):
-      """Return encoded data for the password."""
-  
+      """Return encoded data for the given password"""
+
   def checkPassword(encoded_password, password):
-      """Return whether the password coincide with the encoded data."""
+      """Return whether the given encoded data coincide with the given password"""
+
+The implementations mentioned above are in the ``zope.password.password`` module.

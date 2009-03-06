@@ -22,4 +22,7 @@ from zope.testing import doctest
 def test_suite():
     return unittest.TestSuite((
         doctest.DocTestSuite('zope.password.password'),
+        doctest.DocTestSuite(
+            'zope.password.testing',
+            optionflags=doctest.ELLIPSIS),
         ))

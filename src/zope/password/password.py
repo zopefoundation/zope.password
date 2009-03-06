@@ -160,6 +160,17 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
+    
+    The old version of this password manager didn't add the {MD5} to
+    passwords. Let's check if it can work with old stored passwords.
+
+    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = encoded[5:]
+    >>> encoded
+    '86dddccec45db4599f1ac00018e54139'
+
+    >>> manager.checkPassword(encoded, password)
+    True
     """
 
     implements(IPasswordManager)
@@ -208,6 +219,18 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
+
+    The old version of this password manager didn't add the {SHA1} to
+    passwords. Let's check if it can work with old stored passwords.
+
+    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = encoded[6:]
+    >>> encoded
+    '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+
+    >>> manager.checkPassword(encoded, password)
+    True
+
     """
 
     implements(IPasswordManager)
