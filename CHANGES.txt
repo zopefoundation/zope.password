@@ -3,8 +3,17 @@ CHANGES
 =======
 
 3.5.1 (unreleased)
+------------------
 
-- ...
+- Make security protection directives in `configure.zcml` execute only
+  if ``zope.security`` is installed. This will allow reuse of the
+  `configure.zcml` file in environments without ``zope.security``,
+  for example with ``repoze.zcml``.
+
+- Add "Password Manager Names" vocabulary for use with ``zope.schema``
+  and ``zope.component``. This change doesn't add depdendency on them,
+  because it's an optional feature and one who want to use that vocabulary
+  is probably already have them installed.
 
 3.5.0 (2009-03-06)
 ------------------
