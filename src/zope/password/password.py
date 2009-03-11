@@ -246,3 +246,12 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             return encoded_password == self.encodePassword(password, salt)
         salt = encoded_password[:-40]
         return encoded_password == self.encodePassword(password, salt)[6:]
+
+
+# Simple registry
+managers = [
+    ('Plain Text', PlainTextPasswordManager()),
+    ('MD5', MD5PasswordManager()),
+    ('SHA1', SHA1PasswordManager()),
+    ('SSHA', SSHAPasswordManager()),
+]

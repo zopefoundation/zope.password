@@ -25,6 +25,7 @@ interface, this package also provides four implementations:
 
 It is strongly recommended to use SSHAPasswordManager, as it's the most secure.
 
+
 Usage
 -----
 
@@ -38,3 +39,17 @@ interface defines only two methods::
       """Return whether the given encoded data coincide with the given password"""
 
 The implementations mentioned above are in the ``zope.password.password`` module.
+
+
+Password Manager Names Vocabulary
+---------------------------------
+
+The ``zope.password.vocabulary`` module provides a vocabulary of registered
+password manager utility names. It is typically registered as an
+`IVocabularyFactory` utility named "Password Manager Names".
+
+It's intended to be used with ``zope.component`` and ``zope.schema``, so
+you need to have them installed and the utility registrations needs to
+be done properly. The `configure.zcml` file, contained in ``zope.password``
+does the registrations, as well as in `setUpPasswordManagers` function in
+``zope.password.testing`` module.

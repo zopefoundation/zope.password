@@ -1,8 +1,7 @@
-<configure xmlns="http://namespaces.zope.org/zope">
-
-  <class class=".password.PlainTextPasswordManager">
-    <allow interface=".interfaces.IPasswordManager" />
-  </class>
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
 
   <utility
       name="Plain Text"
@@ -10,19 +9,11 @@
       factory=".password.PlainTextPasswordManager"
       />
 
-  <class class=".password.MD5PasswordManager">
-    <allow interface=".interfaces.IPasswordManager" />
-  </class>
-
   <utility
       name="MD5"
       provides=".interfaces.IPasswordManager"
       factory=".password.MD5PasswordManager"
       />
-
-  <class class=".password.SHA1PasswordManager">
-    <allow interface=".interfaces.IPasswordManager" />
-  </class>
 
   <utility
       name="SHA1"
@@ -30,14 +21,37 @@
       factory=".password.SHA1PasswordManager"
       />
 
-  <class class=".password.SSHAPasswordManager">
-    <allow interface=".interfaces.IPasswordManager" />
-  </class>
-
   <utility
       name="SSHA"
       provides=".interfaces.IPasswordManager"
       factory=".password.SSHAPasswordManager"
       />
+
+  <utility
+      zcml:condition="installed zope.schema"
+      component=".vocabulary.PasswordManagerNamesVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      name="Password Manager Names"
+      />
+
+  <configure zcml:condition="installed zope.security">
+
+    <class class=".password.PlainTextPasswordManager">
+      <allow interface=".interfaces.IPasswordManager" />
+    </class>
+  
+    <class class=".password.MD5PasswordManager">
+      <allow interface=".interfaces.IPasswordManager" />
+    </class>
+  
+    <class class=".password.SHA1PasswordManager">
+      <allow interface=".interfaces.IPasswordManager" />
+    </class>
+  
+    <class class=".password.SSHAPasswordManager">
+      <allow interface=".interfaces.IPasswordManager" />
+    </class>
+
+  </configure>
 
 </configure>
