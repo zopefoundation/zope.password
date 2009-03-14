@@ -19,7 +19,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='zope.password',
-      version='3.5.1dev',
+      version='3.5.1',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
@@ -40,7 +40,7 @@ setup(name='zope.password',
           'Operating System :: OS Independent',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: Zope3'],
-      keywords='zope3 zope authentication password',
+      keywords='zope authentication password',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
       extras_require=dict(vocabulary=['zope.component', 'zope.schema'],
