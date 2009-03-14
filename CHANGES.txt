@@ -11,10 +11,9 @@ CHANGES
   for example with ``repoze.zcml``.
 
 - Add "Password Manager Names" vocabulary for use with ``zope.schema``
-  and ``zope.component``, like it was in ``zope.app.authentication``. It's
-  an optional feature so it doesn't add hard dependency. We use "vocabulary"
-  extra to list dependencies needed for vocabulary functionality. Also, the
-  zcml vocabulary registration is executed only if ``zope.schema`` is installed.
+  and ``zope.component``, like it was in ``zope.app.authentication``.
+  It's an optional feature so it doesn't add hard dependency. We use
+  "vocabulary" extra to list dependencies needed for vocabulary functionality.
 
 3.5.0 (2009-03-06)
 ------------------

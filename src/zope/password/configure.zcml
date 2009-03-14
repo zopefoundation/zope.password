@@ -28,7 +28,6 @@
       />
 
   <utility
-      zcml:condition="installed zope.schema"
       component=".vocabulary.PasswordManagerNamesVocabulary"
       provides="zope.schema.interfaces.IVocabularyFactory"
       name="Password Manager Names"
