@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2009 Zope Corporation and Contributors.
+# Copyright (c) 2009 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -20,7 +20,7 @@ from setuptools import setup, find_packages
 
 setup(name='zope.password',
       version='3.5.2dev',
-      author='Zope Corporation and Contributors',
+      author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
       long_description=(
