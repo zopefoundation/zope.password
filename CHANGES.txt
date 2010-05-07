@@ -5,6 +5,8 @@ CHANGES
 3.5.2 (unreleased)
 ------------------
 
+- Removed zope.testing dependency for tests.
+
 - Updated some copyright headers to comply to repository policy.
 
 - Added zpasswd script formerly hold in zope.app.server. Contrary to
