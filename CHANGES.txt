@@ -5,7 +5,10 @@ CHANGES
 3.5.2 (unreleased)
 ------------------
 
-- ...
+- Added zpasswd script formerly hold in zope.app.server. Contrary to
+  former zpasswd script, which used "Plain Text" as default password
+  manager, now SSHA is used as default.
+
 
 3.5.1 (2009-03-14)
 ------------------
