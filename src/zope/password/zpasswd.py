@@ -17,13 +17,11 @@ $Id$
 """
 import optparse
 import os
+import pkg_resources
 import sys
 from xml.sax.saxutils import quoteattr
 
-from zope.app.applicationcontrol import zopeversion
-
-
-# TODO: We need to resolve code duplication in zpasswd.py and mkzopeinstance.py
+VERSION = pkg_resources.get_distribution('zope.password').version
 
 def main(argv=None):
     """Top-level script function to create a new principals."""
@@ -192,18 +190,23 @@ class Application(object):
             return value
 
     def get_password_manager(self):
+        default = 0
         self.print_message("Password manager:")
         print
         managers = self.options.managers
+
         for i, (name, manager) in enumerate(managers):
             print "% i. %s" % (i + 1, name)
+            if name == 'SSHA':
+                default = i
         print
         self.need_blank_line = True
         while True:
             password_manager = self.read_input_line(
-                "Password Manager Number [1]: ")
+                "Password Manager Number [%s]: " % (default + 1))
             if not password_manager:
                 index = 0
+                index = default
                 break
             elif password_manager.isdigit():
                 index = int(password_manager)
@@ -260,10 +263,10 @@ def get_password_managers(config_path=None):
 def parse_args(argv):
     """Parse the command line, returning an object representing the input."""
     path, prog = os.path.split(os.path.realpath(argv[0]))
-    version = "%prog for " + zopeversion.ZopeVersionUtility.getZopeVersion()
+    #version = "%prog %s " % VERSION
     p = optparse.OptionParser(prog=prog,
                               usage="%prog [options]",
-                              version=version)
+                              version=VERSION)
     p.add_option("-c", "--config", dest="config", metavar="FILE",
         help=("path to the site.zcml configuration file"
         " (more accurate but slow password managers registry creation)"))
@@ -273,7 +276,7 @@ def parse_args(argv):
     options, args = p.parse_args(argv[1:])
     options.managers = get_password_managers(options.config)
     options.program = prog
-    options.version = version
+    options.version = VERSION
     if args:
         p.error("too many arguments")
     return options
