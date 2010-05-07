@@ -17,17 +17,35 @@ $Id$
 """
 
 import os
+import sys
 import unittest, doctest
+from StringIO import StringIO
 
-from zope.password import password
-from zope.app.server.tests.test_mkzopeinstance import TestBase
+from zope.password import password, zpasswd
 
-from zope.app.server import zpasswd
+class TestBase(unittest.TestCase):
+    def setUp(self):
+        # Create a minimal site.zcml file
+        open('testsite.zcml', 'wb').write(
+            '<configure xmlns="http://namespaces.zope.org/zope"/>\n'
+            )
+        self.stdout = StringIO()
+        self.stderr = StringIO()
+        self.old_stdout = sys.stdout
+        self.old_stderr = sys.stderr
+        sys.stdout = self.stdout
+        sys.stderr = self.stderr
+
+    def tearDown(self):
+        sys.stdout = self.old_stdout
+        sys.stderr = self.old_stderr
+        # Clean up
+        os.unlink('testsite.zcml')
 
 
 class ArgumentParsingTestCase(TestBase):
 
-    config = os.path.join(os.path.dirname(__file__), "site.zcml")
+    config = "testsite.zcml"
 
     def parse_args(self, args):
         argv = ["foo/bar.py"] + args
@@ -130,7 +148,7 @@ class InputCollectionTestCase(TestBase):
 
 
 def test_suite():
-    suite = doctest.DocTestSuite('zope.app.server.zpasswd')
+    suite = doctest.DocTestSuite('zope.password.zpasswd')
     suite.addTest(unittest.makeSuite(ArgumentParsingTestCase))
     suite.addTest(unittest.makeSuite(InputCollectionTestCase))
     return suite
