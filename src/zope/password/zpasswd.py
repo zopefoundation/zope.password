@@ -205,7 +205,6 @@ class Application(object):
             password_manager = self.read_input_line(
                 "Password Manager Number [%s]: " % (default + 1))
             if not password_manager:
-                index = 0
                 index = default
                 break
             elif password_manager.isdigit():
@@ -263,7 +262,6 @@ def get_password_managers(config_path=None):
 def parse_args(argv):
     """Parse the command line, returning an object representing the input."""
     path, prog = os.path.split(os.path.realpath(argv[0]))
-    #version = "%prog %s " % VERSION
     p = optparse.OptionParser(prog=prog,
                               usage="%prog [options]",
                               version=VERSION)
