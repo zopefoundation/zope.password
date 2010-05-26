@@ -73,7 +73,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     SSHA is regularly used in LDAP databases and we should be
     compatible with passwords used there.
-    
+
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = SSHAPasswordManager()
@@ -96,13 +96,13 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     Our password manager generates the same value when seeded with the
     same salt, so we can be sure, our output is compatible with
     standard LDAP tools that also use SSHA::
-    
+
     >>> from base64 import urlsafe_b64decode
     >>> salt = urlsafe_b64decode('XkOZbw==')
     >>> encoded = manager.encodePassword('secret', salt)
     >>> encoded
     '{SSHA}J4mrr3NQHXzLVaT0h9TuEWoJOrxeQ5lv'
-    
+
     >>> encoded = manager.encodePassword(password)
     >>> manager.checkPassword(encoded, password)
     True
@@ -111,6 +111,15 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
+
+    The password manager should be able to cope with unicode strings for input::
+
+    >>> passwd = u'foobar\u2211' # sigma-sign.
+    >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
+    True
+    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    True
+
     """
 
     implements(IPasswordManager)
@@ -120,10 +129,13 @@ class SSHAPasswordManager(PlainTextPasswordManager):
             salt = urandom(4)
         hash = sha1(_encoder(password)[0])
         hash.update(salt)
-        return '{SSHA}' + urlsafe_b64encode(
-            hash.digest() + salt)
+        return '{SSHA}' + urlsafe_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
+        # urlsafe_b64decode() cannot handle unicode input string. We
+        # encode to ascii. This is safe as the encoded_password string
+        # should not contain non-ascii characters anyway.
+        encoded_password = encoded_password.encode('ascii')
         byte_string = urlsafe_b64decode(encoded_password[6:])
         salt = byte_string[20:]
         return encoded_password == self.encodePassword(password, salt)
@@ -134,7 +146,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     Note: use of salt in this password manager is purely
     cosmetical. Use SSHA if you want increased security.
-    
+
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = MD5PasswordManager()
@@ -160,7 +172,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
-    
+
     The old version of this password manager didn't add the {MD5} to
     passwords. Let's check if it can work with old stored passwords.
 
@@ -193,7 +205,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     Note: use of salt in this password manager is purely
     cosmetical. Use SSHA if you want increased security.
-    
+
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = SHA1PasswordManager()
