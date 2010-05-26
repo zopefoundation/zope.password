@@ -5,8 +5,10 @@ CHANGES
 3.6.1 (unreleased)
 ------------------
 
-(none yet)
-
+- The SSHAPasswordManager.checkPassword() would not handle unicode input
+  (even if the string would only contain ascii characters). Now, the
+  encoded_password input will be encoded to ascii, which is deemed safe as it
+  should not contain non-ascii characters anyway.
 
 3.6.0 (2010-05-07)
 ------------------
@@ -18,7 +20,6 @@ CHANGES
 - Added zpasswd script formerly hold in zope.app.server. Contrary to
   former zpasswd script, which used "Plain Text" as default password
   manager, now SSHA is used as default.
-
 
 3.5.1 (2009-03-14)
 ------------------
