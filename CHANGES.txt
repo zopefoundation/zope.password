@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-3.6.1 (unreleased)
+3.6.1 (2010-05-27)
 ------------------
 
 - The SSHAPasswordManager.checkPassword() would not handle unicode input
