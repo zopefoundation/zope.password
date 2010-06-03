@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Password manager interface
-
-$Id$
 """
 import zope.interface
 
@@ -24,4 +22,4 @@ class IPasswordManager(zope.interface.Interface):
         """Return encoded data for the given password"""
 
     def checkPassword(encoded_password, password):
-        """Return whether the given encoded data coincide with the given password"""
+        """Does the given encoded data coincide with the given password"""

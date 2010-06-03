@@ -11,10 +11,9 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Vocabulary of password manager utility names for use with zope.component and
-zope.schema.
+"""Vocabulary of password manager utility names
 
-$Id$
+For use with zope.component and zope.schema.
 """
 from zope.component import getUtilitiesFor
 from zope.interface import directlyProvides

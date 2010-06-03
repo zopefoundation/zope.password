@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Setup for zope.password package
-
-$Id$
 """
 from setuptools import setup, find_packages
 

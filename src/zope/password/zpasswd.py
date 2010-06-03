@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Implementation of the zpasswd script.
-
-$Id$
 """
 import optparse
 import os

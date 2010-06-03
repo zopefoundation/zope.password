@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Password Managers Tests
-
-$Id$
 """
 import doctest
 import unittest

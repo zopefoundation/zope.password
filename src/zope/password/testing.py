@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Setup password managers as utilities
-
-$Id$
 """
 __docformat__ = "reStructuredText"
 
