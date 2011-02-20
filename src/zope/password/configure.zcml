@@ -34,7 +34,7 @@
       />
 
   <utility
-      name="MYSQL"
+      name="MySQL"
       provides=".interfaces.IMatchingPasswordManager"
       factory=".legacy.MySQLPasswordManager"
       />
