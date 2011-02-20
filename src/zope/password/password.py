@@ -127,6 +127,9 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
+    Because a random salt is generated, the output of encodePassword is
+    different every time you call it.
+
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
 
@@ -207,6 +210,14 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.encodePassword('secret')
     '{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ=='
 
+    The password manager should be able to cope with unicode strings for input::
+
+    >>> passwd = u'foobar\u2211' # sigma-sign.
+    >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
+    True
+    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    True
+
     A previous version of this manager also created a cosmetic salt, added
     to the start of the hash, but otherwise not used in creating the hash
     itself. Moreover, it generated the MD5 hash as a hex digest, not a base64
@@ -269,6 +280,14 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     >>> manager.encodePassword('secret')
     '{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ='
+
+    The password manager should be able to cope with unicode strings for input::
+
+    >>> passwd = u'foobar\u2211' # sigma-sign.
+    >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
+    True
+    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    True
 
     A previous version of this manager also created a cosmetic salt, added
     to the start of the hash, but otherwise not used in creating the hash
