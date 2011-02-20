@@ -16,6 +16,12 @@
       />
 
   <utility
+      name="SMD5"
+      provides=".interfaces.IMatchingPasswordManager"
+      factory=".password.SMD5PasswordManager"
+      />
+
+  <utility
       name="SHA1"
       provides=".interfaces.IMatchingPasswordManager"
       factory=".password.SHA1PasswordManager"
@@ -54,6 +60,10 @@
     </class>
   
     <class class=".password.MD5PasswordManager">
+      <allow interface=".interfaces.IMatchingPasswordManager" />
+    </class>
+  
+    <class class=".password.SMD5PasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
   

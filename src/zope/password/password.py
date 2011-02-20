@@ -182,6 +182,93 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return encoded_password.startswith('{SSHA}')
 
 
+class SMD5PasswordManager(PlainTextPasswordManager):
+    """SMD5 password manager.
+
+    SMD5 is basically SMD5-encoding which also incorporates a salt
+    into the encoded string. This way, stored passwords are more
+    robust against dictionary attacks of attackers that could get
+    access to lists of encoded passwords.
+
+    >>> from zope.interface.verify import verifyObject
+
+    >>> manager = SMD5PasswordManager()
+    >>> verifyObject(IMatchingPasswordManager, manager)
+    True
+
+    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded
+    '{SMD5}ht3czsRdtFmfGsAAGOVBOQ=='
+
+    >>> manager.match(encoded)
+    True
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
+    Using the `slappasswd` utility to encode ``secret``, we get
+    ``{SMD5}zChC6x0tl2zr9fjvjZzKePV5KWA=`` as seeded hash.
+
+    Our password manager generates the same value when seeded with the
+    same salt, so we can be sure, our output is compatible with
+    standard LDAP tools that also use SMD5::
+
+    >>> from base64 import standard_b64decode
+    >>> salt = standard_b64decode('9XkpYA==')
+    >>> password = 'secret'
+    >>> encoded = manager.encodePassword(password, salt)
+    >>> encoded
+    '{SMD5}zChC6x0tl2zr9fjvjZzKePV5KWA='
+
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
+    Because a random salt is generated, the output of encodePassword is
+    different every time you call it.
+
+    >>> manager.encodePassword(password) != manager.encodePassword(password)
+    True
+
+    The password manager should be able to cope with unicode strings for input::
+
+    >>> passwd = u'foobar\u2211' # sigma-sign.
+    >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
+    True
+    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    True
+
+    The manager only claims to implement SMD5 encodings, anything not starting
+    with the string {SMD5} returns False::
+
+    >>> manager.match('{MD5}someotherhash')
+    False
+
+    """
+
+    def encodePassword(self, password, salt=None):
+        if salt is None:
+            salt = urandom(4)
+        hash = md5(_encoder(password)[0])
+        hash.update(salt)
+        return '{SMD5}' + standard_b64encode(hash.digest() + salt)
+
+    def checkPassword(self, encoded_password, password):
+        # standard_b64decode() cannot handle unicode input string. We
+        # encode to ascii. This is safe as the encoded_password string
+        # should not contain non-ascii characters anyway.
+        encoded_password = encoded_password.encode('ascii')[6:]
+        byte_string = standard_b64decode(encoded_password)
+        salt = byte_string[16:]
+        return encoded_password == self.encodePassword(password, salt)[6:]
+
+    def match(self, encoded_password):
+        return encoded_password.startswith('{SMD5}')
+
+
 class MD5PasswordManager(PlainTextPasswordManager):
     """MD5 password manager.
 
@@ -347,6 +434,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 managers = [
     ('Plain Text', PlainTextPasswordManager()),
     ('MD5', MD5PasswordManager()),
+    ('SMD5', SMD5PasswordManager()),
     ('SHA1', SHA1PasswordManager()),
     ('SSHA', SSHAPasswordManager()),
 ]

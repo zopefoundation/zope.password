@@ -21,6 +21,7 @@ from zope.schema.interfaces import IVocabularyFactory
 from zope.password.interfaces import IMatchingPasswordManager
 from zope.password.password import PlainTextPasswordManager
 from zope.password.password import MD5PasswordManager
+from zope.password.password import SMD5PasswordManager
 from zope.password.password import SHA1PasswordManager
 from zope.password.password import SSHAPasswordManager
 from zope.password.legacy import MySQLPasswordManager
@@ -42,6 +43,8 @@ def setUpPasswordManagers():
     <zope.password.password.PlainTextPasswordManager object at 0x...>
     >>> getUtility(IMatchingPasswordManager, 'SSHA')
     <zope.password.password.SSHAPasswordManager object at 0x...>
+    >>> getUtility(IMatchingPasswordManager, 'SMD5')
+    <zope.password.password.SMD5PasswordManager object at 0x...>
     >>> getUtility(IMatchingPasswordManager, 'MD5')
     <zope.password.password.MD5PasswordManager object at 0x...>
     >>> getUtility(IMatchingPasswordManager, 'SHA1')
@@ -71,6 +74,8 @@ def setUpPasswordManagers():
     True
     >>> 'MD5' in voc
     True
+    >>> 'SMD5' in voc
+    True
     >>> 'MYSQL' in voc
     True
 
@@ -82,6 +87,7 @@ def setUpPasswordManagers():
                    'Plain Text')
     provideUtility(SSHAPasswordManager(), IMatchingPasswordManager, 'SSHA')
     provideUtility(MD5PasswordManager(), IMatchingPasswordManager, 'MD5')
+    provideUtility(SMD5PasswordManager(), IMatchingPasswordManager, 'SMD5')
     provideUtility(SHA1PasswordManager(), IMatchingPasswordManager, 'SHA1')
     provideUtility(MySQLPasswordManager(), IMatchingPasswordManager, 'MYSQL')
     

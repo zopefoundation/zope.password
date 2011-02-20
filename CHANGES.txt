@@ -16,6 +16,9 @@ CHANGES
 - Add a crypt password manager to fully support all methods named in RFC 2307.
   It is contained in the 'legacy' module however, to flag crypt's status.
 
+- Add a SMD5 (salted MD5) password manager to fully support all encoding
+  schemes implemented by OpenLDAP.
+
 - Add a MySQL PASSWORD() (versions before 4.1) password manager, as also found
   in Zope2's AccessControl.AuthEncoding module.
 
