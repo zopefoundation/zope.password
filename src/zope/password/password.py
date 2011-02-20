@@ -15,8 +15,8 @@
 """
 __docformat__ = 'restructuredtext'
 
-from base64 import urlsafe_b64encode
-from base64 import urlsafe_b64decode
+from base64 import standard_b64encode
+from base64 import standard_b64decode
 from os import urandom
 from codecs import getencoder
 try:
@@ -113,8 +113,8 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     same salt, so we can be sure, our output is compatible with
     standard LDAP tools that also use SSHA::
 
-    >>> from base64 import urlsafe_b64decode
-    >>> salt = urlsafe_b64decode('XkOZbw==')
+    >>> from base64 import standard_b64decode
+    >>> salt = standard_b64decode('XkOZbw==')
     >>> password = 'secret'
     >>> encoded = manager.encodePassword(password, salt)
     >>> encoded
@@ -149,14 +149,14 @@ class SSHAPasswordManager(PlainTextPasswordManager):
             salt = urandom(4)
         hash = sha1(_encoder(password)[0])
         hash.update(salt)
-        return '{SSHA}' + urlsafe_b64encode(hash.digest() + salt)
+        return '{SSHA}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
         # urlsafe_b64decode() cannot handle unicode input string. We
         # encode to ascii. This is safe as the encoded_password string
         # should not contain non-ascii characters anyway.
         encoded_password = encoded_password.encode('ascii')
-        byte_string = urlsafe_b64decode(encoded_password[6:])
+        byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[20:]
         return encoded_password == self.encodePassword(password, salt)
 
