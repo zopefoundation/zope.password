@@ -13,11 +13,11 @@ six implementations:
   more secure implementations.
 
 * MD5PasswordManager - a password manager that uses MD5 algorithm to
-  encode passwords. It's generally weak against dictionary attacks.
+  encode passwords. It's generally weak against dictionary attacks due to a
+  lack of a salt.
  
 * SHA1PasswordManager - a password manager that uses SHA1 algorithm to
-  encode passwords. It has the same salt weakness as the
-  MD5PasswordManager.
+  encode passwords. It has the same weakness as the MD5PasswordManager.
  
 * SSHAPasswordManager - the most secure password manager that is
   strong against dictionary attacks. It's basically SHA1-encoding

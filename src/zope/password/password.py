@@ -18,7 +18,6 @@ __docformat__ = 'restructuredtext'
 from base64 import urlsafe_b64encode
 from base64 import urlsafe_b64decode
 from os import urandom
-from random import randint
 from codecs import getencoder
 try:
     from hashlib import md5, sha1
@@ -227,9 +226,6 @@ class MD5PasswordManager(PlainTextPasswordManager):
 class SHA1PasswordManager(PlainTextPasswordManager):
     """SHA1 password manager.
 
-    Note: use of salt in this password manager is purely
-    cosmetical. Use SSHA if you want increased security.
-
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = SHA1PasswordManager()
@@ -237,7 +233,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = manager.encodePassword(password)
     >>> encoded
     '{SHA}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
     >>> manager.match(encoded)
@@ -247,23 +243,10 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    >>> encoded = manager.encodePassword(password)
-    >>> encoded[-40:]
-    '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
-    >>> manager.match(encoded)
-    True
-    >>> manager.checkPassword(encoded, password)
-    True
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    False
-
-    >>> manager.encodePassword(password) != manager.encodePassword(password)
-    True
-
     The old version of this password manager didn't add the {SHA} to
     passwords. Let's check if it can work with old stored passwords.
 
-    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = manager.encodePassword(password)
     >>> encoded = encoded[5:]
     >>> encoded
     '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
@@ -276,6 +259,14 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     >>> manager.match(encoded)
     False
+
+    A previous version of this manager also created a cosmetic salt, added
+    to the start of the hash, but otherwise not used in creating the hash
+    itself. To still support these 'hashed' passwords, only the last 40 bytes
+    of the pre-existing hash are used:
+    
+    >>> manager.checkPassword('salt' + encoded, password)
+    True
 
     Previously, this password manager used {SHA1} as a prefix, but this was
     changed to be compatible with LDAP (RFC 2307). The old prefix is still
@@ -293,17 +284,15 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     """
 
     def encodePassword(self, password, salt=None):
-        if salt is None:
-            salt = "%08x" % randint(0, 0xffffffff)
-        return '{SHA}%s%s' % (salt, sha1(_encoder(password)[0]).hexdigest())
+        # The salt argument only exists for backwards compatibility and is
+        # ignored on purpose.
+        return '{SHA}%s' % sha1(_encoder(password)[0]).hexdigest()
 
     def checkPassword(self, encoded_password, password):
         if self.match(encoded_password):
             encoded = encoded_password[encoded_password.find('}') + 1:]
-            salt = encoded[:-40]
-            return encoded == self.encodePassword(password, salt)[5:]
-        salt = encoded_password[:-40]
-        return encoded_password == self.encodePassword(password, salt)[5:]
+            return encoded[-40:] == self.encodePassword(password)[5:]
+        return encoded_password[-40:] == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
         return (
