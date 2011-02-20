@@ -22,7 +22,7 @@ CHANGES
 - Remove the useless, cosmetic salt from the MD5 and SHA1 password managers,
   and use base64 encoding instead of hexdigests. This makes the output of
   these managers compatible with other MD5 and SHA1 hash implementations such
-  as RFC 2307 but doesn't lower it's security in any way. Checking passwards
+  as RFC 2307 but doesn't lower it's security in any way. Checking passwords
   against old, still 'salted' password hashes with hexdigests is still
   supported.
 
