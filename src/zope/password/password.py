@@ -116,11 +116,11 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     >>> from base64 import urlsafe_b64decode
     >>> salt = urlsafe_b64decode('XkOZbw==')
-    >>> encoded = manager.encodePassword('secret', salt)
+    >>> password = 'secret'
+    >>> encoded = manager.encodePassword(password, salt)
     >>> encoded
     '{SSHA}J4mrr3NQHXzLVaT0h9TuEWoJOrxeQ5lv'
 
-    >>> encoded = manager.encodePassword(password)
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
