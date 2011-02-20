@@ -9,6 +9,8 @@ CHANGES
   if a given password hash was encdoded with the scheme implemented by the
   specific manager.
 
+- Use {SHA} as the prefix for SHA1-encoded passwords to be compatible with
+  RFC 2307, but support matching against {SHA1} for backwards compatibility.
 
 3.6.1 (2010-05-27)
 ------------------

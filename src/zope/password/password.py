@@ -255,7 +255,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password, salt="")
     >>> encoded
-    '{SHA1}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    '{SHA}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -276,11 +276,11 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
 
-    The old version of this password manager didn't add the {SHA1} to
+    The old version of this password manager didn't add the {SHA} to
     passwords. Let's check if it can work with old stored passwords.
 
     >>> encoded = manager.encodePassword(password, salt="")
-    >>> encoded = encoded[6:]
+    >>> encoded = encoded[5:]
     >>> encoded
     '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
 
@@ -293,6 +293,19 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.match(encoded)
     False
 
+    Previously, this password manager used {SHA1} as a prefix, but this was
+    changed to be compatible with LDAP (RFC 2307). The old prefix is still
+    supported:
+
+    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    >>> encoded = '{SHA1}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    >>> manager.match(encoded)
+    True
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
     """
 
     implements(IPasswordManager)
@@ -300,17 +313,20 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = "%08x" % randint(0, 0xffffffff)
-        return '{SHA1}%s%s' % (salt, sha1(_encoder(password)[0]).hexdigest())
+        return '{SHA}%s%s' % (salt, sha1(_encoder(password)[0]).hexdigest())
 
     def checkPassword(self, encoded_password, password):
-        if encoded_password.startswith('{SHA1}'):
-            salt = encoded_password[6:-40]
-            return encoded_password == self.encodePassword(password, salt)
+        if self.match(encoded_password):
+            encoded = encoded_password[encoded_password.find('}') + 1:]
+            salt = encoded[:-40]
+            return encoded == self.encodePassword(password, salt)[5:]
         salt = encoded_password[:-40]
-        return encoded_password == self.encodePassword(password, salt)[6:]
+        return encoded_password == self.encodePassword(password, salt)[5:]
 
     def match(self, encoded_password):
-        return encoded_password.startswith('{SHA1}')
+        return (
+            encoded_password.startswith('{SHA}') or 
+            encoded_password.startswith('{SHA1}'))
 
 
 # Simple registry
