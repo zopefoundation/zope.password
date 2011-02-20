@@ -15,7 +15,7 @@ four implementations:
 * MD5PasswordManager - a password manager that uses MD5 algorithm to
   encode passwords. It adds salt to the encoded password, but the salt
   is not used for encoding the password itself, so the use of salt in
-  it is purely cosmetical. It's generally weak against dictionary
+  it is purely cosmetic. It's generally weak against dictionary
   attacks.
  
 * SHA1PasswordManager - a password manager that uses SHA1 algorithm to
