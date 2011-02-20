@@ -2,12 +2,13 @@
 CHANGES
 =======
 
-4.0.0 (unreleased)
+3.7.0 (unreleased)
 ------------------
 
-- Add a 'match' method to the IPasswordManager interface, which returns True
-  if a given password hash was encdoded with the scheme implemented by the
-  specific manager.
+- Add a new IMatchingPasswordManager interface with a 'match' method, which
+  returns True if a given password hash was encdoded with the scheme
+  implemented by the specific manager. All managers in this package implement
+  this interface.
 
 - Use {SHA} as the prefix for SHA1-encoded passwords to be compatible with
   RFC 2307, but support matching against {SHA1} for backwards compatibility.

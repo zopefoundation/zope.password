@@ -25,7 +25,7 @@ except ImportError:
     crypt = None
 
 from zope.interface import implements
-from zope.password.interfaces import IPasswordManager
+from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
@@ -41,7 +41,7 @@ if crypt is not None:
         >>> from zope.interface.verify import verifyObject
 
         >>> manager = CryptPasswordManager()
-        >>> verifyObject(IPasswordManager, manager)
+        >>> verifyObject(IMatchingPasswordManager, manager)
         True
 
         >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -95,7 +95,7 @@ if crypt is not None:
 
         """
 
-        implements(IPasswordManager)
+        implements(IMatchingPasswordManager)
 
         def encodePassword(self, password, salt=None):
             if salt is None:
@@ -122,7 +122,7 @@ class MySQLPasswordManager(object):
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = MySQLPasswordManager()
-    >>> verifyObject(IPasswordManager, manager)
+    >>> verifyObject(IMatchingPasswordManager, manager)
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -161,7 +161,7 @@ class MySQLPasswordManager(object):
 
     """
 
-    implements(IPasswordManager)
+    implements(IMatchingPasswordManager)
 
     def encodePassword(self, password):
         nr = 1345345333L

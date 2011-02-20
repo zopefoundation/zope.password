@@ -18,7 +18,7 @@ __docformat__ = "reStructuredText"
 from zope.component import provideUtility
 from zope.schema.interfaces import IVocabularyFactory
 
-from zope.password.interfaces import IPasswordManager
+from zope.password.interfaces import IMatchingPasswordManager
 from zope.password.password import PlainTextPasswordManager
 from zope.password.password import MD5PasswordManager
 from zope.password.password import SHA1PasswordManager
@@ -38,15 +38,15 @@ def setUpPasswordManagers():
     >>> from zope.component import getUtility
     >>> setUpPasswordManagers()
 
-    >>> getUtility(IPasswordManager, 'Plain Text')
+    >>> getUtility(IMatchingPasswordManager, 'Plain Text')
     <zope.password.password.PlainTextPasswordManager object at 0x...>
-    >>> getUtility(IPasswordManager, 'SSHA')
+    >>> getUtility(IMatchingPasswordManager, 'SSHA')
     <zope.password.password.SSHAPasswordManager object at 0x...>
-    >>> getUtility(IPasswordManager, 'MD5')
+    >>> getUtility(IMatchingPasswordManager, 'MD5')
     <zope.password.password.MD5PasswordManager object at 0x...>
-    >>> getUtility(IPasswordManager, 'SHA1')
+    >>> getUtility(IMatchingPasswordManager, 'SHA1')
     <zope.password.password.SHA1PasswordManager object at 0x...>
-    >>> getUtility(IPasswordManager, 'MYSQL')
+    >>> getUtility(IMatchingPasswordManager, 'MYSQL')
     <zope.password.legacy.MySQLPasswordManager object at 0x...>
 
     >>> try:
@@ -55,8 +55,8 @@ def setUpPasswordManagers():
     ...     CryptPasswordManager = None
     ...     True
     ... else:
-    ...     from zope.password.legacy import CryptPasswordManager
-    ...     getUtility(IPasswordManager, 'Crypt') is CryptPasswordManager
+    ...     from zope.password.legacy import CryptPasswordManager as cpm
+    ...     getUtility(IMatchingPasswordManager, 'Crypt') is cpm
     True
 
     >>> voc = getUtility(IVocabularyFactory, 'Password Manager Names')
@@ -78,14 +78,15 @@ def setUpPasswordManagers():
     True
     
     """
-    provideUtility(PlainTextPasswordManager(), IPasswordManager, 'Plain Text')
-    provideUtility(SSHAPasswordManager(), IPasswordManager, 'SSHA')
-    provideUtility(MD5PasswordManager(), IPasswordManager, 'MD5')
-    provideUtility(SHA1PasswordManager(), IPasswordManager, 'SHA1')
-    provideUtility(MySQLPasswordManager(), IPasswordManager, 'MYSQL')
+    provideUtility(PlainTextPasswordManager(), IMatchingPasswordManager,
+                   'Plain Text')
+    provideUtility(SSHAPasswordManager(), IMatchingPasswordManager, 'SSHA')
+    provideUtility(MD5PasswordManager(), IMatchingPasswordManager, 'MD5')
+    provideUtility(SHA1PasswordManager(), IMatchingPasswordManager, 'SHA1')
+    provideUtility(MySQLPasswordManager(), IMatchingPasswordManager, 'MYSQL')
     
     if CryptPasswordManager is not None:
-        provideUtility(CryptPasswordManager, IPasswordManager, 'Crypt')
+        provideUtility(CryptPasswordManager, IMatchingPasswordManager, 'Crypt')
 
     provideUtility(PasswordManagerNamesVocabulary,
                    IVocabularyFactory, 'Password Manager Names')

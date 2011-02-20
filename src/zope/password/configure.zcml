@@ -5,38 +5,38 @@
 
   <utility
       name="Plain Text"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".password.PlainTextPasswordManager"
       />
 
   <utility
       name="MD5"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".password.MD5PasswordManager"
       />
 
   <utility
       name="SHA1"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".password.SHA1PasswordManager"
       />
 
   <utility
       name="SSHA"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".password.SSHAPasswordManager"
       />
 
   <utility
       name="MYSQL"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".legacy.MySQLPasswordManager"
       />
 
   <configure zcml:condition="installed crypt">
   <utility
       name="Crypt"
-      provides=".interfaces.IPasswordManager"
+      provides=".interfaces.IMatchingPasswordManager"
       factory=".legacy.CryptPasswordManager"
       />
   </configure>
@@ -50,23 +50,23 @@
   <configure zcml:condition="installed zope.security">
 
     <class class=".password.PlainTextPasswordManager">
-      <allow interface=".interfaces.IPasswordManager" />
+      <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
   
     <class class=".password.MD5PasswordManager">
-      <allow interface=".interfaces.IPasswordManager" />
+      <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
   
     <class class=".password.SHA1PasswordManager">
-      <allow interface=".interfaces.IPasswordManager" />
+      <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
   
     <class class=".password.SSHAPasswordManager">
-      <allow interface=".interfaces.IPasswordManager" />
+      <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
 
     <class class=".password.SSHAPasswordManager">
-      <allow interface=".interfaces.IPasswordManager" />
+      <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
 
   </configure>

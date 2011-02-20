@@ -28,7 +28,7 @@ except ImportError:
     from sha import new as sha1
 
 from zope.interface import implements
-from zope.password.interfaces import IPasswordManager
+from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
@@ -39,7 +39,7 @@ class PlainTextPasswordManager(object):
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = PlainTextPasswordManager()
-    >>> verifyObject(IPasswordManager, manager)
+    >>> verifyObject(IMatchingPasswordManager, manager)
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -61,7 +61,7 @@ class PlainTextPasswordManager(object):
     False
     """
 
-    implements(IPasswordManager)
+    implements(IMatchingPasswordManager)
 
     def encodePassword(self, password):
         return password
@@ -92,7 +92,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = SSHAPasswordManager()
-    >>> verifyObject(IPasswordManager, manager)
+    >>> verifyObject(IMatchingPasswordManager, manager)
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -145,8 +145,6 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     """
 
-    implements(IPasswordManager)
-
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
@@ -176,7 +174,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = MD5PasswordManager()
-    >>> verifyObject(IPasswordManager, manager)
+    >>> verifyObject(IMatchingPasswordManager, manager)
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -222,8 +220,6 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     """
 
-    implements(IPasswordManager)
-
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = "%08x" % randint(0, 0xffffffff)
@@ -249,7 +245,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = SHA1PasswordManager()
-    >>> verifyObject(IPasswordManager, manager)
+    >>> verifyObject(IMatchingPasswordManager, manager)
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
@@ -307,8 +303,6 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     False
 
     """
-
-    implements(IPasswordManager)
 
     def encodePassword(self, password, salt=None):
         if salt is None:
