@@ -112,6 +112,7 @@ if crypt is not None:
         def match(self, encoded_password):
             return encoded_password.startswith('{CRYPT}')
 
+
 class MySQLPasswordManager(object):
     """A MySQL digest manager.
 
