@@ -12,6 +12,9 @@ CHANGES
 - Use {SHA} as the prefix for SHA1-encoded passwords to be compatible with
   RFC 2307, but support matching against {SHA1} for backwards compatibility.
 
+- Add a crypt password manager to fully support all methods named in RFC 2307.
+  It is contained in the 'legacy' module however, to flag crypt's status.
+
 3.6.1 (2010-05-27)
 ------------------
 

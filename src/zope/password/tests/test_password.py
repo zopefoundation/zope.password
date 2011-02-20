@@ -19,6 +19,7 @@ import unittest
 def test_suite():
     return unittest.TestSuite((
         doctest.DocTestSuite('zope.password.password'),
+        doctest.DocTestSuite('zope.password.legacy'),
         doctest.DocTestSuite(
             'zope.password.testing',
             optionflags=doctest.ELLIPSIS),

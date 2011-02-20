@@ -27,6 +27,14 @@
       factory=".password.SSHAPasswordManager"
       />
 
+  <configure zcml:condition="installed crypt">
+  <utility
+      name="Crypt"
+      provides=".interfaces.IPasswordManager"
+      factory=".legacy.CryptPasswordManager"
+      />
+  </configure>
+
   <utility
       component=".vocabulary.PasswordManagerNamesVocabulary"
       provides="zope.schema.interfaces.IVocabularyFactory"
@@ -47,6 +55,10 @@
       <allow interface=".interfaces.IPasswordManager" />
     </class>
   
+    <class class=".password.SSHAPasswordManager">
+      <allow interface=".interfaces.IPasswordManager" />
+    </class>
+
     <class class=".password.SSHAPasswordManager">
       <allow interface=".interfaces.IPasswordManager" />
     </class>

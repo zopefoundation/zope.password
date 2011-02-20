@@ -25,6 +25,11 @@ from zope.password.password import SHA1PasswordManager
 from zope.password.password import SSHAPasswordManager
 from zope.password.vocabulary import PasswordManagerNamesVocabulary
 
+try:
+    from zope.password.legacy import CryptPasswordManager
+except ImportError:
+    CryptPasswordManager = None
+
 
 def setUpPasswordManagers():
     """Helper function for setting up password manager utilities for tests
@@ -41,6 +46,16 @@ def setUpPasswordManagers():
     >>> getUtility(IPasswordManager, 'SHA1')
     <zope.password.password.SHA1PasswordManager object at 0x...>
 
+    >>> try:
+    ...     import crypt
+    ... except ImportError:
+    ...     CryptPasswordManager = None
+    ...     True
+    ... else:
+    ...     from zope.password.legacy import CryptPasswordManager
+    ...     getUtility(IPasswordManager, 'Crypt') is CryptPasswordManager
+    True
+
     >>> voc = getUtility(IVocabularyFactory, 'Password Manager Names')
     >>> voc = voc(None)
     >>> voc
@@ -53,12 +68,18 @@ def setUpPasswordManagers():
     True
     >>> 'MD5' in voc
     True
+
+    >>> CryptPasswordManager is None or 'Crypt' in voc
+    True
     
     """
     provideUtility(PlainTextPasswordManager(), IPasswordManager, 'Plain Text')
     provideUtility(SSHAPasswordManager(), IPasswordManager, 'SSHA')
     provideUtility(MD5PasswordManager(), IPasswordManager, 'MD5')
     provideUtility(SHA1PasswordManager(), IPasswordManager, 'SHA1')
+    
+    if CryptPasswordManager is not None:
+        provideUtility(CryptPasswordManager, IPasswordManager, 'Crypt')
 
     provideUtility(PasswordManagerNamesVocabulary,
                    IVocabularyFactory, 'Password Manager Names')
