@@ -25,6 +25,9 @@ CHANGES
   way. Checking passwards against old, still 'salted' password hashes is still
   supported.
 
+- Use the standard_base64encode method instead of url_base64encode to maintain
+  compatibility with LDAP.
+
 3.6.1 (2010-05-27)
 ------------------
 

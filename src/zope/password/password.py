@@ -17,6 +17,7 @@ __docformat__ = 'restructuredtext'
 
 from base64 import standard_b64encode
 from base64 import standard_b64decode
+from base64 import urlsafe_b64decode
 from os import urandom
 from codecs import getencoder
 try:
@@ -152,13 +153,16 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return '{SSHA}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        # urlsafe_b64decode() cannot handle unicode input string. We
+        # standard_b64decode() cannot handle unicode input string. We
         # encode to ascii. This is safe as the encoded_password string
         # should not contain non-ascii characters anyway.
-        encoded_password = encoded_password.encode('ascii')
-        byte_string = standard_b64decode(encoded_password[6:])
+        encoded_password = encoded_password.encode('ascii')[6:]
+        if '_' in encoded_password or '-' in encoded_password:
+            # Encoded using urlsafe_b64encode
+            byte_string = urlsafe_b64decode(encoded_password)
+        byte_string = standard_b64decode(encoded_password)
         salt = byte_string[20:]
-        return encoded_password == self.encodePassword(password, salt)
+        return encoded_password == self.encodePassword(password, salt)[6:]
 
     def match(self, encoded_password):
         return encoded_password.startswith('{SSHA}')
