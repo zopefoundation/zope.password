@@ -108,7 +108,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     False
 
     Using the `slappasswd` utility to encode ``secret``, we get
-    ``{SSHA}J4mrr3NQHXzLVaT0h9TuEWoJOrxeQ5lv`` as seeded hash.
+    ``{SSHA}x3HIoiF9y6YRi/I4W1fkptbzTDiNr+9l`` as seeded hash.
 
     Our password manager generates the same value when seeded with the
     same salt, so we can be sure, our output is compatible with
