@@ -185,16 +185,6 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    '{MD5}86dddccec45db4599f1ac00018e54139'
-    >>> manager.match(encoded)
-    True
-    >>> manager.checkPassword(encoded, password)
-    True
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    False
-
     The old version of this password manager didn't add the {MD5} to
     passwords. Let's check if it can work with old stored passwords.
 
