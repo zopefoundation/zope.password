@@ -168,9 +168,6 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 class MD5PasswordManager(PlainTextPasswordManager):
     """MD5 password manager.
 
-    Note: use of salt in this password manager is purely
-    cosmetical. Use SSHA if you want increased security.
-
     >>> from zope.interface.verify import verifyObject
 
     >>> manager = MD5PasswordManager()
@@ -178,7 +175,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
     True
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = manager.encodePassword(password)
     >>> encoded
     '{MD5}86dddccec45db4599f1ac00018e54139'
     >>> manager.match(encoded)
@@ -189,8 +186,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     False
 
     >>> encoded = manager.encodePassword(password)
-    >>> encoded[-32:]
-    '86dddccec45db4599f1ac00018e54139'
+    >>> encoded
+    '{MD5}86dddccec45db4599f1ac00018e54139'
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -198,13 +195,10 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    >>> manager.encodePassword(password) != manager.encodePassword(password)
-    True
-
     The old version of this password manager didn't add the {MD5} to
     passwords. Let's check if it can work with old stored passwords.
 
-    >>> encoded = manager.encodePassword(password, salt="")
+    >>> encoded = manager.encodePassword(password)
     >>> encoded = encoded[5:]
     >>> encoded
     '86dddccec45db4599f1ac00018e54139'
@@ -218,19 +212,23 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.match(encoded)
     False
 
+    A previous version of this manager also created a cosmetic salt, added
+    to the start of the hash, but otherwise not used in creating the hash
+    itself. To still support these 'hashed' passwords, only the last 32 bytes
+    of the pre-existing hash are used:
+    
+    >>> manager.checkPassword('salt' + encoded, password)
+    True
+
     """
 
     def encodePassword(self, password, salt=None):
-        if salt is None:
-            salt = "%08x" % randint(0, 0xffffffff)
-        return '{MD5}%s%s' % (salt, md5(_encoder(password)[0]).hexdigest())
+        # The salt argument only exists for backwards compatibility and is
+        # ignored on purpose.
+        return '{MD5}%s' % (md5(_encoder(password)[0]).hexdigest())
 
     def checkPassword(self, encoded_password, password):
-        if encoded_password.startswith('{MD5}'):
-            salt = encoded_password[5:-32]
-            return encoded_password == self.encodePassword(password, salt)
-        salt = encoded_password[:-32]
-        return encoded_password == self.encodePassword(password, salt)[5:]
+        return encoded_password[-32:] == self.encodePassword(password)[-32:]
 
     def match(self, encoded_password):
         return encoded_password.startswith('{MD5}')
