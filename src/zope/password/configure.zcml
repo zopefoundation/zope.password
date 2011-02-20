@@ -65,9 +65,15 @@
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
 
-    <class class=".password.SSHAPasswordManager">
+    <class class=".legacy.MySQLPasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
+
+    <configure zcml:condition="installed crypt">
+      <class class=".legacy.CryptPasswordManager">
+        <allow interface=".interfaces.IMatchingPasswordManager" />
+      </class>
+    </configure>
 
   </configure>
 
