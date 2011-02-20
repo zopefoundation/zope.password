@@ -27,6 +27,12 @@
       factory=".password.SSHAPasswordManager"
       />
 
+  <utility
+      name="MYSQL"
+      provides=".interfaces.IPasswordManager"
+      factory=".legacy.MySQLPasswordManager"
+      />
+
   <configure zcml:condition="installed crypt">
   <utility
       name="Crypt"

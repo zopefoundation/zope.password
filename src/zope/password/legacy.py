@@ -112,3 +112,73 @@ if crypt is not None:
         def match(self, encoded_password):
             return encoded_password.startswith('{CRYPT}')
 
+class MySQLPasswordManager(object):
+    """A MySQL digest manager.
+
+    This Password Manager implements the digest scheme as implemented in the
+    MySQL PASSWORD function in MySQL versions before 4.1. Note that this
+    method results in a very weak 16-byte hash.
+
+    >>> from zope.interface.verify import verifyObject
+
+    >>> manager = MySQLPasswordManager()
+    >>> verifyObject(IPasswordManager, manager)
+    True
+
+    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    >>> encoded = manager.encodePassword(password)
+    >>> encoded
+    '{MYSQL}0ecd752c5097d395'
+    >>> manager.match(encoded)
+    True
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
+    Using the password 'PHP & Information Security' should result in the
+    hash ``379693e271cd3bd6``, according to 
+    http://phpsec.org/articles/2005/password-hashing.html
+
+    Our password manager generates the same value when seeded with the, so we 
+    can be sure, our output is compatible with MySQL versions before 4.1::
+
+    >>> password = 'PHP & Information Security'
+    >>> encoded = manager.encodePassword(password)
+    >>> encoded
+    '{MYSQL}379693e271cd3bd6'
+
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
+    The manager only claims to implement MYSQL encodings, anything not 
+    starting with the string {MYSQL} returns False::
+
+    >>> manager.match('{MD5}someotherhash')
+    False
+
+    """
+
+    implements(IPasswordManager)
+
+    def encodePassword(self, password):
+        nr = 1345345333L
+        add = 7
+        nr2 = 0x12345671L
+        for i in _encoder(password)[0]:
+            if i == ' ' or i == '\t':
+                continue
+            nr ^= (((nr & 63) + add) * ord(i)) + (nr << 8)
+            nr2 += (nr2 << 8) ^ nr
+            add += ord(i)
+        r0 = nr & ((1L << 31) - 1L)
+        r1 = nr2 & ((1L << 31) - 1L)
+        return "{MYSQL}%08lx%08lx" % (r0, r1)
+
+    def checkPassword(self, encoded_password, password):
+        return encoded_password == self.encodePassword(password)
+
+    def match(self, encoded_password):
+        return encoded_password.startswith('{MYSQL}')

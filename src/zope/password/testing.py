@@ -23,6 +23,7 @@ from zope.password.password import PlainTextPasswordManager
 from zope.password.password import MD5PasswordManager
 from zope.password.password import SHA1PasswordManager
 from zope.password.password import SSHAPasswordManager
+from zope.password.legacy import MySQLPasswordManager
 from zope.password.vocabulary import PasswordManagerNamesVocabulary
 
 try:
@@ -45,6 +46,8 @@ def setUpPasswordManagers():
     <zope.password.password.MD5PasswordManager object at 0x...>
     >>> getUtility(IPasswordManager, 'SHA1')
     <zope.password.password.SHA1PasswordManager object at 0x...>
+    >>> getUtility(IPasswordManager, 'MYSQL')
+    <zope.password.legacy.MySQLPasswordManager object at 0x...>
 
     >>> try:
     ...     import crypt
@@ -68,6 +71,8 @@ def setUpPasswordManagers():
     True
     >>> 'MD5' in voc
     True
+    >>> 'MYSQL' in voc
+    True
 
     >>> CryptPasswordManager is None or 'Crypt' in voc
     True
@@ -77,6 +82,7 @@ def setUpPasswordManagers():
     provideUtility(SSHAPasswordManager(), IPasswordManager, 'SSHA')
     provideUtility(MD5PasswordManager(), IPasswordManager, 'MD5')
     provideUtility(SHA1PasswordManager(), IPasswordManager, 'SHA1')
+    provideUtility(MySQLPasswordManager(), IPasswordManager, 'MYSQL')
     
     if CryptPasswordManager is not None:
         provideUtility(CryptPasswordManager, IPasswordManager, 'Crypt')
