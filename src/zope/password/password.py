@@ -115,11 +115,11 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     standard LDAP tools that also use SSHA::
 
     >>> from base64 import standard_b64decode
-    >>> salt = standard_b64decode('XkOZbw==')
+    >>> salt = standard_b64decode('ja/vZQ==')
     >>> password = 'secret'
     >>> encoded = manager.encodePassword(password, salt)
     >>> encoded
-    '{SSHA}J4mrr3NQHXzLVaT0h9TuEWoJOrxeQ5lv'
+    '{SSHA}x3HIoiF9y6YRi/I4W1fkptbzTDiNr+9l'
 
     >>> manager.checkPassword(encoded, password)
     True
@@ -143,6 +143,14 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> manager.match('{MD5}someotherhash')
     False
 
+    An older version of this manager used the urlsafe variant of the base64
+    encoding (replacing / and + characters with _ and - respectively). Hashes
+    encoded with the old manager are still supported::
+
+    >>> encoded = '{SSHA}x3HIoiF9y6YRi_I4W1fkptbzTDiNr-9l'
+    >>> manager.checkPassword(encoded, 'secret')
+    True
+
     """
 
     def encodePassword(self, password, salt=None):
@@ -158,9 +166,11 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         # should not contain non-ascii characters anyway.
         encoded_password = encoded_password.encode('ascii')[6:]
         if '_' in encoded_password or '-' in encoded_password:
-            # Encoded using urlsafe_b64encode
+            # Encoded using old urlsafe_b64encode, re-encode
             byte_string = urlsafe_b64decode(encoded_password)
-        byte_string = standard_b64decode(encoded_password)
+            encoded_password = standard_b64encode(byte_string)
+        else:
+            byte_string = standard_b64decode(encoded_password)
         salt = byte_string[20:]
         return encoded_password == self.encodePassword(password, salt)[6:]
 
