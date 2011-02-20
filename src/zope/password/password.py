@@ -18,6 +18,7 @@ __docformat__ = 'restructuredtext'
 from base64 import standard_b64encode
 from base64 import standard_b64decode
 from base64 import urlsafe_b64decode
+from binascii import a2b_hex
 from os import urandom
 from codecs import getencoder
 try:
@@ -190,7 +191,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
     >>> encoded
-    '{MD5}86dddccec45db4599f1ac00018e54139'
+    '{MD5}ht3czsRdtFmfGsAAGOVBOQ=='
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -198,14 +199,21 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    The old version of this password manager didn't add the {MD5} to
-    passwords. Let's check if it can work with old stored passwords.
+    This password manager is compatible with other RFC 2307 MD5
+    implementations. For example the output of the slappasswd command for
+    a MD5 hashing of ``secret`` is ``{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==``,
+    and our implementation returns the same hash::
 
-    >>> encoded = manager.encodePassword(password)
-    >>> encoded = encoded[5:]
-    >>> encoded
-    '86dddccec45db4599f1ac00018e54139'
+    >>> manager.encodePassword('secret')
+    '{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ=='
 
+    A previous version of this manager also created a cosmetic salt, added
+    to the start of the hash, but otherwise not used in creating the hash
+    itself. Moreover, it generated the MD5 hash as a hex digest, not a base64
+    encoded value and did not include the {MD5} prefix. Such hashed values are
+    still supported too:
+
+    >>> encoded = 'salt86dddccec45db4599f1ac00018e54139'
     >>> manager.checkPassword(encoded, password)
     True
 
@@ -215,23 +223,20 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> manager.match(encoded)
     False
 
-    A previous version of this manager also created a cosmetic salt, added
-    to the start of the hash, but otherwise not used in creating the hash
-    itself. To still support these 'hashed' passwords, only the last 32 bytes
-    of the pre-existing hash are used:
-    
-    >>> manager.checkPassword('salt' + encoded, password)
-    True
-
     """
 
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return '{MD5}%s' % (md5(_encoder(password)[0]).hexdigest())
+        return '{MD5}%s' % standard_b64encode(
+            md5(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        return encoded_password[-32:] == self.encodePassword(password)[-32:]
+        encoded = encoded_password[encoded_password.find('}') + 1:]
+        if len(encoded) > 24:
+            # Backwards compatible, hexencoded md5 and bogus salt
+            encoded = standard_b64encode(a2b_hex(encoded[-32:]))
+        return encoded == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
         return encoded_password.startswith('{MD5}')
@@ -249,7 +254,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
     >>> encoded
-    '{SHA}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    '{SHA}BLTuxxVMXzouxtKVb7gLgNxzdAI='
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -257,14 +262,21 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    The old version of this password manager didn't add the {SHA} to
-    passwords. Let's check if it can work with old stored passwords.
+    This password manager is compatible with other RFC 2307 SHA
+    implementations. For example the output of the slappasswd command for
+    a SHA hashing of ``secret`` is ``{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=``,
+    and our implementation returns the same hash::
 
-    >>> encoded = manager.encodePassword(password)
-    >>> encoded = encoded[5:]
-    >>> encoded
-    '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    >>> manager.encodePassword('secret')
+    '{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ='
 
+    A previous version of this manager also created a cosmetic salt, added
+    to the start of the hash, but otherwise not used in creating the hash
+    itself. Moreover, it generated the SHA hash as a hex digest, not a base64
+    encoded value and did not include the {SHA} prefix. Such hashed values are
+    still supported too:
+
+    >>> encoded = 'salt04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
     >>> manager.checkPassword(encoded, password)
     True
 
@@ -274,17 +286,9 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.match(encoded)
     False
 
-    A previous version of this manager also created a cosmetic salt, added
-    to the start of the hash, but otherwise not used in creating the hash
-    itself. To still support these 'hashed' passwords, only the last 40 bytes
-    of the pre-existing hash are used:
-    
-    >>> manager.checkPassword('salt' + encoded, password)
-    True
-
     Previously, this password manager used {SHA1} as a prefix, but this was
     changed to be compatible with LDAP (RFC 2307). The old prefix is still
-    supported:
+    supported (note the hexdigest encoding as well):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = '{SHA1}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
@@ -300,13 +304,19 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return '{SHA}%s' % sha1(_encoder(password)[0]).hexdigest()
+        return '{SHA}%s' % standard_b64encode(
+            sha1(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
         if self.match(encoded_password):
             encoded = encoded_password[encoded_password.find('}') + 1:]
-            return encoded[-40:] == self.encodePassword(password)[5:]
-        return encoded_password[-40:] == self.encodePassword(password)[5:]
+            if len(encoded) > 28:
+                # Backwards compatible, hexencoded sha1 and bogus salt
+                encoded = standard_b64encode(a2b_hex(encoded[-40:]))
+            return encoded == self.encodePassword(password)[5:]
+        # Backwards compatible, hexdigest and no prefix
+        encoded_password = standard_b64encode(a2b_hex(encoded_password[-40:]))
+        return encoded_password == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
         return (
