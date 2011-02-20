@@ -50,6 +50,15 @@ class PlainTextPasswordManager(object):
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
+
+    The plain text password manager *never* claims to implement the scheme,
+    because this would open a security hole, where a hash from a different
+    scheme could be used as-is as a plain-text password. Authentication code
+    that needs to support plain-text passwords need to explicitly check for
+    plain-text password matches after all other options have been tested for::
+
+    >>> manager.match(encoded)
+    False
     """
 
     implements(IPasswordManager)
@@ -59,6 +68,14 @@ class PlainTextPasswordManager(object):
 
     def checkPassword(self, encoded_password, password):
         return encoded_password == self.encodePassword(password)
+
+    def match(self, encoded_password):
+        # We always return False for PlainText because it was a) not encrypted
+        # and b) matching against actual encryption methods would result in
+        # the ability to authenticate with the un-encrypted hash as a password.
+        # For example, you should not be able to authenticate with a literal
+        # SSHA hash.
+        return False
 
 
 class SSHAPasswordManager(PlainTextPasswordManager):
@@ -83,6 +100,8 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> encoded
     '{SSHA}BLTuxxVMXzouxtKVb7gLgNxzdAI='
 
+    >>> manager.match(encoded)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -118,6 +137,12 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
     True
 
+    The manager only claims to implement SSHA encodings, anything not starting
+    with the string {SSHA} returns False::
+
+    >>> manager.match('{MD5}someotherhash')
+    False
+
     """
 
     implements(IPasswordManager)
@@ -138,6 +163,9 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         salt = byte_string[20:]
         return encoded_password == self.encodePassword(password, salt)
 
+    def match(self, encoded_password):
+        return encoded_password.startswith('{SSHA}')
+
 
 class MD5PasswordManager(PlainTextPasswordManager):
     """MD5 password manager.
@@ -155,6 +183,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> encoded = manager.encodePassword(password, salt="")
     >>> encoded
     '{MD5}86dddccec45db4599f1ac00018e54139'
+    >>> manager.match(encoded)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -163,6 +193,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> encoded = manager.encodePassword(password)
     >>> encoded[-32:]
     '86dddccec45db4599f1ac00018e54139'
+    >>> manager.match(encoded)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -181,6 +213,13 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     >>> manager.checkPassword(encoded, password)
     True
+
+    However, because the prefix is missing, the password manager cannot claim
+    to implement the scheme:
+
+    >>> manager.match(encoded)
+    False
+
     """
 
     implements(IPasswordManager)
@@ -196,6 +235,9 @@ class MD5PasswordManager(PlainTextPasswordManager):
             return encoded_password == self.encodePassword(password, salt)
         salt = encoded_password[:-32]
         return encoded_password == self.encodePassword(password, salt)[5:]
+
+    def match(self, encoded_password):
+        return encoded_password.startswith('{MD5}')
 
 
 class SHA1PasswordManager(PlainTextPasswordManager):
@@ -214,6 +256,8 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> encoded = manager.encodePassword(password, salt="")
     >>> encoded
     '{SHA1}04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    >>> manager.match(encoded)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -222,6 +266,8 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> encoded = manager.encodePassword(password)
     >>> encoded[-40:]
     '04b4eec7154c5f3a2ec6d2956fb80b80dc737402'
+    >>> manager.match(encoded)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -241,6 +287,12 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password)
     True
 
+    However, because the prefix is missing, the password manager cannot claim
+    to implement the scheme:
+
+    >>> manager.match(encoded)
+    False
+
     """
 
     implements(IPasswordManager)
@@ -256,6 +308,9 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             return encoded_password == self.encodePassword(password, salt)
         salt = encoded_password[:-40]
         return encoded_password == self.encodePassword(password, salt)[6:]
+
+    def match(self, encoded_password):
+        return encoded_password.startswith('{SHA1}')
 
 
 # Simple registry

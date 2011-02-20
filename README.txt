@@ -39,13 +39,20 @@ Usage
 
 It's very easy to use password managers. The
 ``zope.password.interfaces.IPasswordManager`` interface defines only
-two methods::
+three methods::
 
   def encodePassword(password):
       """Return encoded data for the given password"""
 
   def checkPassword(encoded_password, password):
       """Return whether the given encoded data coincide with the given password"""
+
+  def match(encoded_password):
+      """
+      Returns True when the given data was encoded with the scheme
+      implemented by this password manager.
+
+      """
 
 The implementations mentioned above are in the
 ``zope.password.password`` module.

@@ -23,3 +23,10 @@ class IPasswordManager(zope.interface.Interface):
 
     def checkPassword(encoded_password, password):
         """Does the given encoded data coincide with the given password"""
+
+    def match(encoded_password):
+        """
+        Returns True when the given data was encoded with the scheme
+        implemented by this password manager.
+        
+        """

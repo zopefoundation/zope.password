@@ -2,10 +2,12 @@
 CHANGES
 =======
 
-3.6.2 (unreleased)
+4.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add a 'match' method to the IPasswordManager interface, which returns True
+  if a given password hash was encdoded with the scheme implemented by the
+  specific manager.
 
 
 3.6.1 (2010-05-27)

@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='zope.password',
-      version='3.6.2dev',
+      version='4.0.0dev',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
