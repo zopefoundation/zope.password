@@ -2,8 +2,13 @@
 CHANGES
 =======
 
-3.7.0 (unreleased)
+4.0.0 (unreleased)
 ------------------
+
+- Replaced deprecated ``zope.interface.implements`` usage with equivalent
+  ``zope.interface.implementer`` decorator.
+
+- Dropped support for Python 2.4 and 2.5.
 
 - Add a new IMatchingPasswordManager interface with a 'match' method, which
   returns True if a given password hash was encdoded with the scheme

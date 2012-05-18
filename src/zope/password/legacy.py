@@ -24,13 +24,14 @@ except ImportError:
     # The crypt module is not universally available, apparently
     crypt = None
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
 
 if crypt is not None:
+    @implementer(IMatchingPasswordManager)
     class CryptPasswordManager(object):
         """Crypt password manager.
         
@@ -95,7 +96,6 @@ if crypt is not None:
 
         """
 
-        implements(IMatchingPasswordManager)
 
         def encodePassword(self, password, salt=None):
             if salt is None:
@@ -113,6 +113,7 @@ if crypt is not None:
             return encoded_password.startswith('{CRYPT}')
 
 
+@implementer(IMatchingPasswordManager)
 class MySQLPasswordManager(object):
     """A MySQL digest manager.
 
@@ -162,7 +163,6 @@ class MySQLPasswordManager(object):
 
     """
 
-    implements(IMatchingPasswordManager)
 
     def encodePassword(self, password):
         nr = 1345345333L

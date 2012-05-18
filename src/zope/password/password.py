@@ -28,12 +28,13 @@ except ImportError:
     from md5 import new as md5
     from sha import new as sha1
 
-from zope.interface import implements
+from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
 
+@implementer(IMatchingPasswordManager)
 class PlainTextPasswordManager(object):
     """Plain text password manager.
 
@@ -62,7 +63,6 @@ class PlainTextPasswordManager(object):
     False
     """
 
-    implements(IMatchingPasswordManager)
 
     def encodePassword(self, password):
         return password
