@@ -14,13 +14,23 @@
 """Password Managers Tests
 """
 import doctest
+import re
 import unittest
+from zope.testing import renormalizing
+
+checker = renormalizing.RENormalizing([
+    # Python 3 bytes add a "b".
+    (re.compile("b('.*?')"),
+     r"\1"),
+    (re.compile('b(".*?")'),
+     r"\1"),
+    ])
 
 def test_suite():
     return unittest.TestSuite((
-        doctest.DocTestSuite('zope.password.password'),
-        doctest.DocTestSuite('zope.password.legacy'),
+        doctest.DocTestSuite('zope.password.password', checker=checker),
+        doctest.DocTestSuite('zope.password.legacy', checker=checker),
         doctest.DocTestSuite(
             'zope.password.testing',
-            optionflags=doctest.ELLIPSIS),
+            optionflags=doctest.ELLIPSIS, checker=checker),
         ))

@@ -17,7 +17,12 @@
 import os
 import sys
 import unittest, doctest
-from StringIO import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    # Py3: StringIO moved to io.
+    from io import StringIO
 
 from zope.password import password, zpasswd
 
@@ -25,7 +30,7 @@ class TestBase(unittest.TestCase):
     def setUp(self):
         # Create a minimal site.zcml file
         open('testsite.zcml', 'wb').write(
-            '<configure xmlns="http://namespaces.zope.org/zope"/>\n'
+            b'<configure xmlns="http://namespaces.zope.org/zope"/>\n'
             )
         self.stdout = StringIO()
         self.stderr = StringIO()
@@ -55,7 +60,7 @@ class ArgumentParsingTestCase(TestBase):
     def check_stdout_content(self, args):
         try:
             options = self.parse_args(args)
-        except SystemExit, e:
+        except SystemExit as e:
             self.assertEqual(e.code, 0)
             self.assert_(self.stdout.getvalue())
             self.failIf(self.stderr.getvalue())
@@ -130,7 +135,8 @@ class InputCollectionTestCase(TestBase):
     def test_principal_information(self):
         options = self.createOptions()
         app = ControlledInputApplication(options,
-            ["id", "title", "login", "1", "passwd", "passwd", "description"])
+            ["id", u"title", u"login", u"1",
+             u"passwd", u"passwd", u"description"])
         app.process()
         self.failUnless(not self.stderr.getvalue())
         self.failUnless(app.all_input_consumed())

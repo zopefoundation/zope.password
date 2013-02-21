@@ -14,7 +14,7 @@
 """Legacy password managers, using now-outdated, insecure methods for hashing
 """
 __docformat__ = 'restructuredtext'
-
+import sys
 from codecs import getencoder
 
 try:
@@ -29,16 +29,24 @@ from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
+PY2 = sys.version_info[0] == 2
+
+try:
+    unicode
+except NameError:
+    # Py3: Define unicode.
+    unicode = str
+
 
 if crypt is not None:
     @implementer(IMatchingPasswordManager)
     class CryptPasswordManager(object):
         """Crypt password manager.
-        
-        Implements a UNIX crypt(3) hashing scheme. Note that crypt is 
+
+        Implements a UNIX crypt(3) hashing scheme. Note that crypt is
         considered far inferior to more modern schemes such as SSHA hashing,
         and only uses the first 8 characters of a password.
-        
+
         >>> from zope.interface.verify import verifyObject
 
         >>> manager = CryptPasswordManager()
@@ -58,7 +66,7 @@ if crypt is not None:
         against an 8 character password plus suffix always matches. Our test
         password (including utf-8 encoding) is exactly 8 characters long, and
         thus affixing 'wrong' to it tests as a correct password::
-        
+
         >>> manager.checkPassword(encoded, password + u"wrong")
         True
 
@@ -67,7 +75,7 @@ if crypt is not None:
         >>> manager.checkPassword(encoded, 'completely wrong')
         False
 
-        Using the `openssl passwd` command-line utility to encode ``secret``, 
+        Using the `openssl passwd` command-line utility to encode ``secret``,
         we get ``erz50QD3gv4Dw`` as seeded hash.
 
         Our password manager generates the same value when seeded with the
@@ -88,7 +96,7 @@ if crypt is not None:
         >>> manager.encodePassword(password) != manager.encodePassword(password)
         True
 
-        The manager only claims to implement CRYPT encodings, anything not 
+        The manager only claims to implement CRYPT encodings, anything not
         starting with the string {CRYPT} returns False::
 
         >>> manager.match('{MD5}someotherhash')
@@ -103,10 +111,13 @@ if crypt is not None:
                            "abcdefghijklmnopqrstuvwxyz"
                            "0123456789./")
                 salt = choice(choices) + choice(choices)
-            return '{CRYPT}%s' % crypt(_encoder(password)[0], salt)
+            if PY2:
+                # Py3: Python 2 can only handle ASCII for crypt.
+                password = _encoder(password)[0]
+            return '{CRYPT}%s' % crypt(password, salt)
 
         def checkPassword(self, encoded_password, password):
-            return encoded_password == self.encodePassword(password, 
+            return encoded_password == self.encodePassword(password,
                 encoded_password[7:9])
 
         def match(self, encoded_password):
@@ -139,10 +150,10 @@ class MySQLPasswordManager(object):
     False
 
     Using the password 'PHP & Information Security' should result in the
-    hash ``379693e271cd3bd6``, according to 
+    hash ``379693e271cd3bd6``, according to
     http://phpsec.org/articles/2005/password-hashing.html
 
-    Our password manager generates the same value when seeded with the, so we 
+    Our password manager generates the same value when seeded with the, so we
     can be sure, our output is compatible with MySQL versions before 4.1::
 
     >>> password = 'PHP & Information Security'
@@ -155,7 +166,7 @@ class MySQLPasswordManager(object):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    The manager only claims to implement MYSQL encodings, anything not 
+    The manager only claims to implement MYSQL encodings, anything not
     starting with the string {MYSQL} returns False::
 
     >>> manager.match('{MD5}someotherhash')
@@ -165,21 +176,28 @@ class MySQLPasswordManager(object):
 
 
     def encodePassword(self, password):
-        nr = 1345345333L
+        nr = 1345345333
         add = 7
-        nr2 = 0x12345671L
+        nr2 = 0x12345671
         for i in _encoder(password)[0]:
-            if i == ' ' or i == '\t':
+            if PY2:
+                # In Python 2 bytes iterate over single-char strings.
+                i = ord(i)
+            if i == ord(b' ') or i == ord(b'\t'):
                 continue
-            nr ^= (((nr & 63) + add) * ord(i)) + (nr << 8)
+            nr ^= (((nr & 63) + add) * i) + (nr << 8)
             nr2 += (nr2 << 8) ^ nr
-            add += ord(i)
-        r0 = nr & ((1L << 31) - 1L)
-        r1 = nr2 & ((1L << 31) - 1L)
-        return "{MYSQL}%08lx%08lx" % (r0, r1)
+            add += i
+        r0 = nr & ((1 << 31) - 1)
+        r1 = nr2 & ((1 << 31) - 1)
+        return ("{MYSQL}%08lx%08lx" % (r0, r1)).encode()
 
     def checkPassword(self, encoded_password, password):
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
         return encoded_password == self.encodePassword(password)
 
     def match(self, encoded_password):
-        return encoded_password.startswith('{MYSQL}')
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        return encoded_password.startswith(b'{MYSQL}')

@@ -19,10 +19,14 @@ class IPasswordManager(zope.interface.Interface):
     """Password manager"""
 
     def encodePassword(password):
-        """Return encoded data for the given password"""
+        """Return encoded data for the given password
+
+        The encoded password is a bytes string.
+        """
 
     def checkPassword(encoded_password, password):
-        """Does the given encoded data coincide with the given password"""
+        """Does the given encoded data coincide with the given password
+        """
 
 class IMatchingPasswordManager(IPasswordManager):
     """Password manager with hash matching support"""
@@ -31,5 +35,5 @@ class IMatchingPasswordManager(IPasswordManager):
         """
         Returns True when the given data was encoded with the scheme
         implemented by this password manager.
-        
+
         """

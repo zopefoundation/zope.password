@@ -35,7 +35,7 @@ except ImportError:
 
 def setUpPasswordManagers():
     """Helper function for setting up password manager utilities for tests
-    
+
     >>> from zope.component import getUtility
     >>> setUpPasswordManagers()
 
@@ -81,7 +81,7 @@ def setUpPasswordManagers():
 
     >>> CryptPasswordManager is None or 'Crypt' in voc
     True
-    
+
     """
     provideUtility(PlainTextPasswordManager(), IMatchingPasswordManager,
                    'Plain Text')
@@ -90,7 +90,7 @@ def setUpPasswordManagers():
     provideUtility(SMD5PasswordManager(), IMatchingPasswordManager, 'SMD5')
     provideUtility(SHA1PasswordManager(), IMatchingPasswordManager, 'SHA1')
     provideUtility(MySQLPasswordManager(), IMatchingPasswordManager, 'MySQL')
-    
+
     if CryptPasswordManager is not None:
         provideUtility(CryptPasswordManager, IMatchingPasswordManager, 'Crypt')
 

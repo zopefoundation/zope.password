@@ -13,6 +13,7 @@
 ##############################################################################
 """Implementation of the zpasswd script.
 """
+from __future__ import print_function
 import optparse
 import os
 import pkg_resources
@@ -27,7 +28,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         options = parse_args(argv)
-    except SystemExit, e:
+    except SystemExit as e:
         if e.code:
             return 2
         else:
@@ -37,14 +38,14 @@ def main(argv=None):
         return app.process()
     except KeyboardInterrupt:
         return 1
-    except SystemExit, e:
+    except SystemExit as e:
         return e.code
 
 class Principal(object):
     """Principal.
 
-    >>> principal = Principal("id", "title", "login", "password")
-    >>> print principal
+    >>> principal = Principal("id", u"title", u"login", b"password")
+    >>> print(principal)
       <principal
         id="id"
         title="title"
@@ -52,9 +53,9 @@ class Principal(object):
         password="password"
         />
 
-    >>> principal = Principal("id", "title", "login", "password",
-    ...     "description", "SHA1")
-    >>> print principal
+    >>> principal = Principal("id", u"title", u"login", b"password",
+    ...     u"description", "SHA1")
+    >>> print(principal)
       <principal
         id="id"
         title="title"
@@ -80,7 +81,7 @@ class Principal(object):
             '    id=%s' % quoteattr(self.id),
             '    title=%s' % quoteattr(self.title),
             '    login=%s' % quoteattr(self.login),
-            '    password=%s' % quoteattr(self.password)
+            '    password=%s' % quoteattr(self.password.decode())
             ]
         if self.description:
             lines.append('    description=%s' % quoteattr(self.description))
@@ -157,9 +158,9 @@ class Application(object):
         principal = self.get_principal()
 
         if destination is sys.stdout:
-            print self.title
-        print >>destination, principal
-        print
+            print(self.title)
+        print(principal, file=destination)
+        print()
 
         return 0
 
@@ -183,7 +184,7 @@ class Application(object):
         while True:
             value = self.read_input_line(prompt).strip()
             if not value and error:
-                print >>sys.stderr, error
+                print(error, file=sys.stderr)
                 continue
             return value
 
@@ -194,7 +195,7 @@ class Application(object):
         managers = self.options.managers
 
         for i, (name, manager) in enumerate(managers):
-            print "% i. %s" % (i + 1, name)
+            print("% i. %s" % (i + 1, name))
             if name == 'SSHA':
                 default = i
         print
@@ -210,8 +211,8 @@ class Application(object):
                 if index > 0 and index <= len(managers):
                     index -= 1
                     break
-            print >>sys.stderr, "You must select a password manager"
-        print "%s password manager selected" % managers[index][0]
+            print("You must select a password manager", file=sys.stderr)
+        print("%s password manager selected" % managers[index][0])
         return managers[index]
 
     def get_password(self):
@@ -219,15 +220,15 @@ class Application(object):
         while True:
             password = self.read_password("Password: ")
             if not password:
-                print >>sys.stderr, "Password may not be empty"
+                print("Password may not be empty", file=sys.stderr)
                 continue
             if password != password.strip() or password.split() != [password]:
-                print >>sys.stderr, "Password may not contain spaces"
+                print("Password may not contain spaces", file=sys.stderr)
                 continue
             break
         again = self.read_password("Verify password: ")
         if again != password:
-            print >>sys.stderr, "Password not verified!"
+            print("Password not verified!", file=sys.stderr)
             sys.exit(1)
         return password
 
@@ -235,7 +236,7 @@ class Application(object):
         if self.need_blank_line:
             print
             self.need_blank_line = False
-        print message
+        print(message)
 
 def get_password_managers(config_path=None):
     if not config_path:
@@ -245,7 +246,7 @@ def get_password_managers(config_path=None):
         from zope.component import getUtilitiesFor
         from zope.password.interfaces import IPasswordManager
 
-        print "Loading configuration..."
+        print("Loading configuration...")
         config = xmlconfig.file(config_path)
         managers = []
         for name, manager in getUtilitiesFor(IPasswordManager):

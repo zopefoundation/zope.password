@@ -19,20 +19,20 @@ from base64 import standard_b64encode
 from base64 import standard_b64decode
 from base64 import urlsafe_b64decode
 from binascii import a2b_hex
+from hashlib import md5, sha1
 from os import urandom
 from codecs import getencoder
-try:
-    from hashlib import md5, sha1
-except ImportError:
-    # Python 2.4
-    from md5 import new as md5
-    from sha import new as sha1
 
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
+try:
+    unicode
+except NameError:
+    # Py3: Define unicode.
+    unicode = str
 
 @implementer(IMatchingPasswordManager)
 class PlainTextPasswordManager(object):
@@ -46,8 +46,8 @@ class PlainTextPasswordManager(object):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    u'right \u0410'
+    >>> encoded == password.encode('utf-8')
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -65,6 +65,8 @@ class PlainTextPasswordManager(object):
 
 
     def encodePassword(self, password):
+        if isinstance(password, unicode):
+            password = password.encode('utf-8')
         return password
 
     def checkPassword(self, encoded_password, password):
@@ -138,7 +140,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
     True
-    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    >>> manager.checkPassword(manager.encodePassword(passwd).decode(), passwd)
     True
 
     The manager only claims to implement SSHA encodings, anything not starting
@@ -160,16 +162,20 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
+        elif isinstance(salt, unicode):
+            salt = salt.encode('utf-8')
         hash = sha1(_encoder(password)[0])
         hash.update(salt)
-        return '{SSHA}' + standard_b64encode(hash.digest() + salt)
+        return b'{SSHA}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
         # standard_b64decode() cannot handle unicode input string. We
         # encode to ascii. This is safe as the encoded_password string
         # should not contain non-ascii characters anyway.
-        encoded_password = encoded_password.encode('ascii')[6:]
-        if '_' in encoded_password or '-' in encoded_password:
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        encoded_password = encoded_password[6:]
+        if b'_' in encoded_password or b'-' in encoded_password:
             # Encoded using old urlsafe_b64encode, re-encode
             byte_string = urlsafe_b64decode(encoded_password)
             encoded_password = standard_b64encode(byte_string)
@@ -179,7 +185,9 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password, salt)[6:]
 
     def match(self, encoded_password):
-        return encoded_password.startswith('{SSHA}')
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        return encoded_password.startswith(b'{SSHA}')
 
 
 class SMD5PasswordManager(PlainTextPasswordManager):
@@ -238,7 +246,7 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
     True
-    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    >>> manager.checkPassword(manager.encodePassword(passwd).decode(), passwd)
     True
 
     The manager only claims to implement SMD5 encodings, anything not starting
@@ -252,21 +260,23 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
+        elif isinstance(salt, unicode):
+            salt = salt.encode('utf-8')
         hash = md5(_encoder(password)[0])
         hash.update(salt)
-        return '{SMD5}' + standard_b64encode(hash.digest() + salt)
+        return b'{SMD5}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        # standard_b64decode() cannot handle unicode input string. We
-        # encode to ascii. This is safe as the encoded_password string
-        # should not contain non-ascii characters anyway.
-        encoded_password = encoded_password.encode('ascii')[6:]
-        byte_string = standard_b64decode(encoded_password)
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[16:]
-        return encoded_password == self.encodePassword(password, salt)[6:]
+        return encoded_password == self.encodePassword(password, salt)
 
     def match(self, encoded_password):
-        return encoded_password.startswith('{SMD5}')
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        return encoded_password.startswith(b'{SMD5}')
 
 
 class MD5PasswordManager(PlainTextPasswordManager):
@@ -302,7 +312,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
     True
-    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    >>> manager.checkPassword(manager.encodePassword(passwd).decode(), passwd)
     True
 
     A previous version of this manager also created a cosmetic salt, added
@@ -326,18 +336,22 @@ class MD5PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return '{MD5}%s' % standard_b64encode(
+        return b'{MD5}' + standard_b64encode(
             md5(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        encoded = encoded_password[encoded_password.find('}') + 1:]
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        encoded = encoded_password[encoded_password.find(b'}') + 1:]
         if len(encoded) > 24:
             # Backwards compatible, hexencoded md5 and bogus salt
             encoded = standard_b64encode(a2b_hex(encoded[-32:]))
         return encoded == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        return encoded_password.startswith('{MD5}')
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
+        return encoded_password.startswith(b'{MD5}')
 
 
 class SHA1PasswordManager(PlainTextPasswordManager):
@@ -373,7 +387,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
     True
-    >>> manager.checkPassword(unicode(manager.encodePassword(passwd)), passwd)
+    >>> manager.checkPassword(manager.encodePassword(passwd).decode(), passwd)
     True
 
     A previous version of this manager also created a cosmetic salt, added
@@ -410,12 +424,14 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return '{SHA}%s' % standard_b64encode(
+        return b'{SHA}' + standard_b64encode(
             sha1(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
         if self.match(encoded_password):
-            encoded = encoded_password[encoded_password.find('}') + 1:]
+            encoded = encoded_password[encoded_password.find(b'}') + 1:]
             if len(encoded) > 28:
                 # Backwards compatible, hexencoded sha1 and bogus salt
                 encoded = standard_b64encode(a2b_hex(encoded[-40:]))
@@ -425,9 +441,11 @@ class SHA1PasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
+        if isinstance(encoded_password, unicode):
+            encoded_password = encoded_password.encode('ascii')
         return (
-            encoded_password.startswith('{SHA}') or 
-            encoded_password.startswith('{SHA1}'))
+            encoded_password.startswith(b'{SHA}') or
+            encoded_password.startswith(b'{SHA1}'))
 
 
 # Simple registry
