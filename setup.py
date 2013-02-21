@@ -31,7 +31,7 @@ def alltests():
     return unittest.TestSuite(suites)
 
 setup(name='zope.password',
-      version='4.0.0dev',
+      version='4.0.0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',

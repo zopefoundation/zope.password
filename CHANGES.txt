@@ -2,8 +2,12 @@
 CHANGES
 =======
 
-4.0.0 (unreleased)
+4.0.0 (2013-02-21)
 ------------------
+
+- Made `zpasswd` a proper console script entry point.
+
+- Added ``tox.ini`` and ``MANIFEST.in``.
 
 - Added support for Python 3.3
 
