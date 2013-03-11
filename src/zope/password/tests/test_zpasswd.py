@@ -54,7 +54,7 @@ class ArgumentParsingTestCase(TestBase):
         argv = ["foo/bar.py"] + args
         options = zpasswd.parse_args(argv)
         self.assertEqual(options.program, "bar.py")
-        self.assert_(options.version)
+        self.assertTrue(options.version)
         return options
 
     def check_stdout_content(self, args):
@@ -62,15 +62,15 @@ class ArgumentParsingTestCase(TestBase):
             options = self.parse_args(args)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
-            self.assert_(self.stdout.getvalue())
+            self.assertTrue(self.stdout.getvalue())
             self.failIf(self.stderr.getvalue())
         else:
             self.fail("expected SystemExit")
 
     def test_no_arguments(self):
         options = self.parse_args([])
-        self.assert_(options.managers)
-        self.assert_(not options.destination)
+        self.assertTrue(options.managers)
+        self.assertTrue(not options.destination)
 
     def test_version_long(self):
         self.check_stdout_content(["--version"])
@@ -91,11 +91,11 @@ class ArgumentParsingTestCase(TestBase):
 
     def test_config_short(self):
         options = self.parse_args(["-c", self.config])
-        self.assert_(options.managers)
+        self.assertTrue(options.managers)
 
     def test_config_long(self):
         options = self.parse_args(["--config", self.config])
-        self.assert_(options.managers)
+        self.assertTrue(options.managers)
 
 class ControlledInputApplication(zpasswd.Application):
 
