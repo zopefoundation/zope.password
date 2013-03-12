@@ -2,16 +2,16 @@
 CHANGES
 =======
 
-4.0.2 (unreleased)
+4.0.2 (2013-03-11)
 ------------------
 
-- Nothing changed yet.
+- Fix some final resource warnings.
 
 
 4.0.1 (2013-03-10)
 ------------------
 
-- Fix test failures under Python 3.3 whn warnings are enabled.
+- Fix test failures under Python 3.3 when warnings are enabled.
 
 
 4.0.0 (2013-02-21)
