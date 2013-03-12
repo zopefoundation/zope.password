@@ -13,7 +13,12 @@
 ##############################################################################
 """Setup for zope.password package
 """
+import os
 from setuptools import setup, find_packages
+
+def read(*rnames):
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as file:
+        return file.read()
 
 def alltests():
     import os
@@ -36,9 +41,9 @@ setup(name='zope.password',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
       long_description=(
-        open('README.txt').read()
+        read('README.txt')
         + '\n\n' +
-        open('CHANGES.txt').read()
+        read('CHANGES.txt')
         ),
       url='http://pypi.python.org/pypi/zope.password',
       license='ZPL 2.1',

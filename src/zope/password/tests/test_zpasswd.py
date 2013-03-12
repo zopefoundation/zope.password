@@ -29,9 +29,9 @@ from zope.password import password, zpasswd
 class TestBase(unittest.TestCase):
     def setUp(self):
         # Create a minimal site.zcml file
-        open('testsite.zcml', 'wb').write(
-            b'<configure xmlns="http://namespaces.zope.org/zope"/>\n'
-            )
+        with open('testsite.zcml', 'wb') as file:
+            file.write(
+                b'<configure xmlns="http://namespaces.zope.org/zope"/>\n')
         self.stdout = StringIO()
         self.stderr = StringIO()
         self.old_stdout = sys.stdout
