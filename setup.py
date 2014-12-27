@@ -41,9 +41,9 @@ setup(name='zope.password',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
       long_description=(
-        read('README.txt')
+        read('README.rst')
         + '\n\n' +
-        read('CHANGES.txt')
+        read('CHANGES.rst')
         ),
       url='http://pypi.python.org/pypi/zope.password',
       license='ZPL 2.1',

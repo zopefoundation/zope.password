@@ -1,40 +1,39 @@
-================
-Password Manager
-================
+``zope.password``
+=================
 
 This package provides a password manager mechanism. Password manager
 is an utility object that can encode and check encoded
 passwords. Beyond the generic interface, this package also provides
 seven implementations:
 
-* PlainTextPasswordManager - the most simple and the less secure
+- PlainTextPasswordManager - the most simple and the less secure
   one. It does not do any password encoding and simply checks password
   by string equality.  It's useful in tests or as a base class for
   more secure implementations.
 
-* MD5PasswordManager - a password manager that uses MD5 algorithm to
+- MD5PasswordManager - a password manager that uses MD5 algorithm to
   encode passwords. It's generally weak against dictionary attacks due to a
   lack of a salt.
  
-* SMD5PasswordManager - a password manager that uses MD5 algorithm, together
+- SMD5PasswordManager - a password manager that uses MD5 algorithm, together
   with a salt to encode passwords. It's better protected against against
   dictionary attacks, but the MD5 hashing algorithm is not as strong as the
   SHA1 algorithm.
 
-* SHA1PasswordManager - a password manager that uses SHA1 algorithm to
+- SHA1PasswordManager - a password manager that uses SHA1 algorithm to
   encode passwords. It has the same weakness as the MD5PasswordManager.
  
-* SSHAPasswordManager - the most secure password manager that is
+- SSHAPasswordManager - the most secure password manager that is
   strong against dictionary attacks. It's basically SHA1-encoding
   password manager which also incorporates a salt into the password
   when encoding it.
 
-* CryptPasswordManager - A manager implementing the crypt(3) hashing scheme.
+- CryptPasswordManager - A manager implementing the crypt(3) hashing scheme.
   Only available if the python crypt module is installed. This is a legacy
   manager, only present to ensure that zope.password can be used for all
   schemes defined in RFC 2307 (LDAP).
 
-* MySQLPasswordManager - A manager implementing the digest scheme as
+- MySQLPasswordManager - A manager implementing the digest scheme as
   implemented in the MySQL PASSWORD function in MySQL versions before 4.1. 
   Note that this method results in a very weak 16-byte hash.
 

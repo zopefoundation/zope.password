@@ -1,11 +1,10 @@
-=======
-CHANGES
+Changes
 =======
 
 4.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add support for testing on Travis.
 
 
 4.0.2 (2013-03-11)
@@ -23,33 +22,33 @@ CHANGES
 4.0.0 (2013-02-21)
 ------------------
 
-- Made `zpasswd` a proper console script entry point.
+- Make ``zpasswd`` a proper console script entry point.
 
-- Added ``tox.ini`` and ``MANIFEST.in``.
+- Add ``tox.ini`` and ``MANIFEST.in``.
 
-- Added support for Python 3.3
+- Add support for Python 3.3
 
-- Replaced deprecated ``zope.interface.implements`` usage with equivalent
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
   ``zope.interface.implementer`` decorator.
 
-- Dropped support for Python 2.4 and 2.5.
+- Drop support for Python 2.4 and 2.5.
 
 - Add a new ``IMatchingPasswordManager`` interface with a 'match' method,
   which returns True if a given password hash was encdoded with the scheme
   implemented by the specific manager. All managers in this package implement
   this interface.
 
-- Use {SHA} as the prefix for SHA1-encoded passwords to be compatible with
-  RFC 2307, but support matching against {SHA1} for backwards compatibility.
+- Use "{SHA}" as the prefix for SHA1-encoded passwords to be compatible with
+  RFC 2307, but support matching against "{SHA1}" for backwards compatibility.
 
 - Add a crypt password manager to fully support all methods named in RFC 2307.
-  It is contained in the 'legacy' module however, to flag crypt's status.
+  It is contained in the ``legacy`` module however, to flag crypt's status.
 
 - Add a SMD5 (salted MD5) password manager to fully support all encoding
   schemes implemented by OpenLDAP.
 
-- Add a MySQL PASSWORD() (versions before 4.1) password manager, as also found
-  in Zope2's AccessControl.AuthEncoding module.
+- Add a MySQL ``PASSWORD()`` (versions before 4.1) password manager, as also
+  found in Zope2's ``AccessControl.AuthEncoding`` module.
 
 - Remove the useless, cosmetic salt from the MD5 and SHA1 password managers,
   and use base64 encoding instead of hexdigests. This makes the output of
@@ -58,34 +57,34 @@ CHANGES
   against old, still 'salted' password hashes with hexdigests is still
   supported.
 
-- Use the standard_base64encode method instead of url_base64encode to maintain
-  compatibility with LDAP.
+- Use the ``standard_base64encode`` method instead of ``url_base64encode``
+  to maintain compatibility with LDAP.
 
 3.6.1 (2010-05-27)
 ------------------
 
 - The SSHAPasswordManager.checkPassword() would not handle unicode input
   (even if the string would only contain ascii characters). Now, the
-  encoded_password input will be encoded to ascii, which is deemed safe as it
-  should not contain non-ascii characters anyway.
+  ``encoded_password`` input will be encoded to ascii, which is deemed safe
+  as it should not contain non-ascii characters anyway.
 
 3.6.0 (2010-05-07)
 ------------------
 
-- Removed zope.testing dependency for tests.
+- Remove ``zope.testing`` dependency for tests.
 
-- Updated some copyright headers to comply to repository policy.
+- Update some copyright headers to comply to repository policy.
 
-- Added zpasswd script formerly hold in zope.app.server. Contrary to
+- Add ``zpasswd`` script formerly hold in zope.app.server. Contrary to
   former zpasswd script, which used "Plain Text" as default password
   manager, now SSHA is used as default.
 
 3.5.1 (2009-03-14)
 ------------------
 
-- Make security protection directives in `configure.zcml` execute only
+- Make security protection directives in ``configure.zcml`` execute only
   if ``zope.security`` is installed. This will allow reuse of the
-  `configure.zcml` file in environments without ``zope.security``,
+  ``configure.zcml`` file in environments without ``zope.security``,
   for example with ``repoze.zcml``.
 
 - Add "Password Manager Names" vocabulary for use with ``zope.schema``
