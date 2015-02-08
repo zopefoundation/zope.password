@@ -1,0 +1,6 @@
+zope.component
+zope.configuration
+zope.interface
+zope.schema
+repoze.sphinx.autointerface
+
