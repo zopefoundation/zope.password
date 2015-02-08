@@ -39,6 +39,8 @@ class PlainTextPasswordManager(object):
     """Plain text password manager.
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import PlainTextPasswordManager
 
     >>> manager = PlainTextPasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)
@@ -93,6 +95,8 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     compatible with passwords used there.
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import SSHAPasswordManager
 
     >>> manager = SSHAPasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)
@@ -199,6 +203,8 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     access to lists of encoded passwords:
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import SMD5PasswordManager
 
     >>> manager = SMD5PasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)
@@ -283,6 +289,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     """MD5 password manager.
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import MD5PasswordManager
 
     >>> manager = MD5PasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)
@@ -357,6 +365,8 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     """SHA1 password manager.
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import SHA1PasswordManager
 
     >>> manager = SHA1PasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)

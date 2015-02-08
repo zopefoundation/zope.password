@@ -48,6 +48,8 @@ if crypt is not None:
         and only uses the first 8 characters of a password.
 
         >>> from zope.interface.verify import verifyObject
+        >>> from zope.password.interfaces import IMatchingPasswordManager
+        >>> from zope.password.legacy import CryptPasswordManager
 
         >>> manager = CryptPasswordManager()
         >>> verifyObject(IMatchingPasswordManager, manager)
@@ -133,6 +135,8 @@ class MySQLPasswordManager(object):
     method results in a very weak 16-byte hash.
 
     >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.legacy import MySQLPasswordManager
 
     >>> manager = MySQLPasswordManager()
     >>> verifyObject(IMatchingPasswordManager, manager)
