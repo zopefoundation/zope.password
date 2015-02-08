@@ -23,6 +23,8 @@ from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from zope.password.interfaces import IPasswordManager
 
 def PasswordManagerNamesVocabulary(context=None):
+    """Return a vocabulary listing password manager implementations by name.
+    """
     terms = []
     for name, util in getUtilitiesFor(IPasswordManager, context):
         terms.append(SimpleTerm(name))

@@ -65,12 +65,12 @@ if crypt is not None:
         Unfortunately, crypt only looks at the first 8 characters, so matching
         against an 8 character password plus suffix always matches. Our test
         password (including utf-8 encoding) is exactly 8 characters long, and
-        thus affixing 'wrong' to it tests as a correct password::
+        thus affixing 'wrong' to it tests as a correct password:
 
         >>> manager.checkPassword(encoded, password + u"wrong")
         True
 
-        Using a completely different password is rejected as expected::
+        Using a completely different password is rejected as expected:
 
         >>> manager.checkPassword(encoded, 'completely wrong')
         False
@@ -80,7 +80,7 @@ if crypt is not None:
 
         Our password manager generates the same value when seeded with the
         same salt, so we can be sure, our output is compatible with
-        standard LDAP tools that also use crypt::
+        standard LDAP tools that also use crypt:
 
         >>> salt = 'er'
         >>> password = 'secret'
@@ -97,7 +97,7 @@ if crypt is not None:
         True
 
         The manager only claims to implement CRYPT encodings, anything not
-        starting with the string {CRYPT} returns False::
+        starting with the string {CRYPT} returns False:
 
         >>> manager.match('{MD5}someotherhash')
         False
@@ -154,7 +154,7 @@ class MySQLPasswordManager(object):
     http://phpsec.org/articles/2005/password-hashing.html
 
     Our password manager generates the same value when seeded with the, so we
-    can be sure, our output is compatible with MySQL versions before 4.1::
+    can be sure, our output is compatible with MySQL versions before 4.1:
 
     >>> password = 'PHP & Information Security'
     >>> encoded = manager.encodePassword(password)
@@ -167,7 +167,7 @@ class MySQLPasswordManager(object):
     False
 
     The manager only claims to implement MYSQL encodings, anything not
-    starting with the string {MYSQL} returns False::
+    starting with the string {MYSQL} returns False:
 
     >>> manager.match('{MD5}someotherhash')
     False

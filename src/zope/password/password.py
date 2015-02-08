@@ -57,7 +57,7 @@ class PlainTextPasswordManager(object):
     because this would open a security hole, where a hash from a different
     scheme could be used as-is as a plain-text password. Authentication code
     that needs to support plain-text passwords need to explicitly check for
-    plain-text password matches after all other options have been tested for::
+    plain-text password matches after all other options have been tested for:
 
     >>> manager.match(encoded)
     False
@@ -115,7 +115,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     Our password manager generates the same value when seeded with the
     same salt, so we can be sure, our output is compatible with
-    standard LDAP tools that also use SSHA::
+    standard LDAP tools that also use SSHA:
 
     >>> from base64 import standard_b64decode
     >>> salt = standard_b64decode('ja/vZQ==')
@@ -135,7 +135,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
 
-    The password manager should be able to cope with unicode strings for input::
+    The password manager should be able to cope with unicode strings for input:
 
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
@@ -144,14 +144,14 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     True
 
     The manager only claims to implement SSHA encodings, anything not starting
-    with the string {SSHA} returns False::
+    with the string {SSHA} returns False:
 
     >>> manager.match('{MD5}someotherhash')
     False
 
     An older version of this manager used the urlsafe variant of the base64
     encoding (replacing / and + characters with _ and - respectively). Hashes
-    encoded with the old manager are still supported::
+    encoded with the old manager are still supported:
 
     >>> encoded = '{SSHA}x3HIoiF9y6YRi_I4W1fkptbzTDiNr-9l'
     >>> manager.checkPassword(encoded, 'secret')
@@ -196,7 +196,7 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     SMD5 is basically SMD5-encoding which also incorporates a salt
     into the encoded string. This way, stored passwords are more
     robust against dictionary attacks of attackers that could get
-    access to lists of encoded passwords.
+    access to lists of encoded passwords:
 
     >>> from zope.interface.verify import verifyObject
 
@@ -216,12 +216,12 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    Using the `slappasswd` utility to encode ``secret``, we get
+    Using the ``slappasswd`` utility to encode ``secret``, we get
     ``{SMD5}zChC6x0tl2zr9fjvjZzKePV5KWA=`` as seeded hash.
 
     Our password manager generates the same value when seeded with the
     same salt, so we can be sure, our output is compatible with
-    standard LDAP tools that also use SMD5::
+    standard LDAP tools that also use SMD5:
 
     >>> from base64 import standard_b64decode
     >>> salt = standard_b64decode('9XkpYA==')
@@ -241,7 +241,8 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     >>> manager.encodePassword(password) != manager.encodePassword(password)
     True
 
-    The password manager should be able to cope with unicode strings for input::
+    The password manager should be able to cope with unicode strings for
+    input:
 
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
@@ -250,11 +251,10 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     True
 
     The manager only claims to implement SMD5 encodings, anything not starting
-    with the string {SMD5} returns False::
+    with the string {SMD5} returns False:
 
     >>> manager.match('{MD5}someotherhash')
     False
-
     """
 
     def encodePassword(self, password, salt=None):
@@ -302,12 +302,12 @@ class MD5PasswordManager(PlainTextPasswordManager):
     This password manager is compatible with other RFC 2307 MD5
     implementations. For example the output of the slappasswd command for
     a MD5 hashing of ``secret`` is ``{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==``,
-    and our implementation returns the same hash::
+    and our implementation returns the same hash:
 
     >>> manager.encodePassword('secret')
     '{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ=='
 
-    The password manager should be able to cope with unicode strings for input::
+    The password manager should be able to cope with unicode strings for input:
 
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
@@ -330,7 +330,6 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     >>> manager.match(encoded)
     False
-
     """
 
     def encodePassword(self, password, salt=None):
@@ -377,12 +376,12 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     This password manager is compatible with other RFC 2307 SHA
     implementations. For example the output of the slappasswd command for
     a SHA hashing of ``secret`` is ``{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=``,
-    and our implementation returns the same hash::
+    and our implementation returns the same hash:
 
     >>> manager.encodePassword('secret')
     '{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ='
 
-    The password manager should be able to cope with unicode strings for input::
+    The password manager should be able to cope with unicode strings for input:
 
     >>> passwd = u'foobar\u2211' # sigma-sign.
     >>> manager.checkPassword(manager.encodePassword(passwd), passwd)
