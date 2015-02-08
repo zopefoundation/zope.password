@@ -4,7 +4,8 @@ Changes
 4.1.1 (unreleased)
 ------------------
 
-- TBD
+- Converted documentation to Sphinx, including testing doctest snippets
+  under ``tox``.
 
 
 4.1.0 (2014-12-27)
