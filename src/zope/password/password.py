@@ -23,6 +23,7 @@ from hashlib import md5, sha1
 from os import urandom
 from codecs import getencoder
 
+import bcrypt
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
 
@@ -457,6 +458,115 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             encoded_password.startswith(b'{SHA1}'))
 
 
+class BCRYPTPasswordManager(PlainTextPasswordManager):
+    """BCRYPT password manager.
+
+    >>> from zope.interface.verify import verifyObject
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.password.password import BCRYPTPasswordManager
+
+    >>> manager = BCRYPTPasswordManager()
+    >>> verifyObject(IMatchingPasswordManager, manager)
+    True
+
+    # Hashing a password for the first time, with a randomly-generated salt
+    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    >>> encoded = manager.encodePassword(password)
+    >>> manager.match(encoded)
+    True
+    >>> manager.checkPassword(encoded, password)
+    True
+    >>> manager.checkPassword(encoded, password + u"wrong")
+    False
+
+    # Subsequently hashing the same password will produce a different encoding
+    >>> encoded2 = manager.encodePassword(password)
+    >>> encoded2 != password
+    True
+
+    # In order to generate thesame hash, the salt previsouly used is required;
+    # The last salt generated is remembered by the password manager,
+    # so we can re-use that to generate the same hash for the given password.
+    >>> encoded3 = manager.encodePassword(password, salt=manager.salt)
+
+    >>> encoded3 == encoded2
+    True
+    >>> manager.match(encoded3)
+    True
+    >>> manager.checkPassword(encoded3, password)
+    True
+    >>> manager.checkPassword(encoded3, password + u"wrong")
+    False
+
+    """
+    _prefix = b'{BCRYPT}'
+    _salt = None
+
+    def _to_bytes(self, password, encoding):
+        if isinstance(password, unicode):
+            return password.encode(encoding)
+        return password
+
+    def _clean_clear(self, password):
+        return self._to_bytes(password, 'utf-8')
+
+    def _clean_hashed(self, hashed_password):
+        return self._to_bytes(hashed_password, 'ascii')
+
+    def _unwind_hashed(self, hashed_password, salt_offset=29):
+        hashed_pw = self._clean_hashed(hashed_password)
+        deprefixed = hashed_pw[hashed_pw.find(b'}') + 1:]
+        return (deprefixed[salt_offset:], deprefixed[:-salt_offset])
+
+    @property
+    def salt(self):
+        return self._salt
+
+    def checkPassword(self, hashed_password, clear_password):
+        """Check a `hashed_password` against a `clear password`.
+
+        :param hashed_password: The encoded password.
+        :type hashed_password: str
+        :param clear_password: The password to check.
+        :type clear_password: unicode
+        :returns: True iif hashed passwords are equal.
+        :rtype: bool
+        """
+        pw_bytes = self._clean_clear(clear_password)
+        (a_hash, a_salt) = self._unwind_hashed(hashed_password)
+        rehashed = self.encodePassword(pw_bytes, salt=a_salt)
+        b_hash = self._unwind_hashed(rehashed)[0]
+        return a_hash == b_hash
+
+    def encodePassword(self, password, salt=None):
+        """Encode a `password`, with an optional `salt`.
+
+        If `salt` is not provided, a unique hash will be generated
+        for each invokation.
+
+        :param password: The clear-text password.
+        :type password: unicode
+        :param salt: The salt to be used to hash the password.
+        :rtype: str
+        :returns: The encoded password as a byte-siring.
+        """
+        if salt is None:
+            salt = bcrypt.gensalt()
+        self._salt = self._clean_hashed(salt)
+        pw = self._clean_clear(password)
+        return self._prefix + bcrypt.hashpw(pw, salt=salt)
+
+    def match(self, hashed_password):
+        """Was the password hashed with this password manager.
+
+        :param hashed_password: The encoded password.
+        :type hashed_password: str
+        :rtype: bool
+        :returns: True iif the password was hashed with this manager.
+        """
+        return hashed_password.startswith(self._prefix)
+
+
 # Simple registry
 managers = [
     ('Plain Text', PlainTextPasswordManager()),
@@ -464,4 +574,5 @@ managers = [
     ('SMD5', SMD5PasswordManager()),
     ('SHA1', SHA1PasswordManager()),
     ('SSHA', SSHAPasswordManager()),
+    ('BCRYPT', BCRYPTPasswordManager()),
 ]
