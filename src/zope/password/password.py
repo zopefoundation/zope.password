@@ -15,25 +15,21 @@
 """
 __docformat__ = 'restructuredtext'
 
-from base64 import standard_b64encode
 from base64 import standard_b64decode
+from base64 import standard_b64encode
 from base64 import urlsafe_b64decode
 from binascii import a2b_hex
+from codecs import getencoder
 from hashlib import md5, sha1
 from os import urandom
-from codecs import getencoder
 
 import bcrypt
 from zope.interface import implementer
+from zope.password.compat import bytes_type, text_type
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
-try:
-    unicode
-except NameError:
-    # Py3: Define unicode.
-    unicode = str
 
 @implementer(IMatchingPasswordManager)
 class PlainTextPasswordManager(object):
@@ -68,7 +64,7 @@ class PlainTextPasswordManager(object):
 
 
     def encodePassword(self, password):
-        if isinstance(password, unicode):
+        if isinstance(password, text_type):
             password = password.encode('utf-8')
         return password
 
@@ -167,7 +163,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
-        elif isinstance(salt, unicode):
+        elif isinstance(salt, text_type):
             salt = salt.encode('utf-8')
         hash = sha1(_encoder(password)[0])
         hash.update(salt)
@@ -177,7 +173,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         # standard_b64decode() cannot handle unicode input string. We
         # encode to ascii. This is safe as the encoded_password string
         # should not contain non-ascii characters anyway.
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         encoded_password = encoded_password[6:]
         if b'_' in encoded_password or b'-' in encoded_password:
@@ -190,7 +186,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password, salt)[6:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{SSHA}')
 
@@ -267,21 +263,21 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
-        elif isinstance(salt, unicode):
+        elif isinstance(salt, text_type):
             salt = salt.encode('utf-8')
         hash = md5(_encoder(password)[0])
         hash.update(salt)
         return b'{SMD5}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[16:]
         return encoded_password == self.encodePassword(password, salt)
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{SMD5}')
 
@@ -348,7 +344,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
             md5(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         encoded = encoded_password[encoded_password.find(b'}') + 1:]
         if len(encoded) > 24:
@@ -357,7 +353,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
         return encoded == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{MD5}')
 
@@ -438,7 +434,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             sha1(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         if self.match(encoded_password):
             encoded = encoded_password[encoded_password.find(b'}') + 1:]
@@ -451,7 +447,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return (
             encoded_password.startswith(b'{SHA}') or
@@ -503,7 +499,7 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     _salt = None
 
     def _to_bytes(self, password, encoding):
-        if isinstance(password, unicode):
+        if isinstance(password, text_type):
             return password.encode(encoding)
         return password
 
@@ -552,6 +548,8 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         """
         if salt is None:
             salt = bcrypt.gensalt()
+        elif isinstance(salt, text_type):
+            salt = salt.encode('utf-8')
         self._salt = self._clean_hashed(salt)
         pw = self._clean_clear(password)
         return self._prefix + bcrypt.hashpw(pw, salt=salt)
