@@ -59,7 +59,7 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         yield (enc_pw1, enc_pw2)
         for enc_pw in (enc_pw1, enc_pw2):
             self.assertTrue(enc_pw.startswith(b'{BCRYPT}'))
-            self.assertIsInstance(enc_pw, bytes_type)
+            self.assertTrue(isinstance(enc_pw, bytes_type))
 
     def test_encodePassword_with_salt(self):
         pw_mgr = self._make_one()
