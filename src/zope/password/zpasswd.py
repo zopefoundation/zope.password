@@ -20,6 +20,11 @@ import pkg_resources
 import sys
 from xml.sax.saxutils import quoteattr
 
+if sys.version_info[0] < 3:
+    ask = raw_input
+else:
+    ask = input
+
 VERSION = pkg_resources.get_distribution('zope.password').version
 
 def main(argv=None):
@@ -134,7 +139,14 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        return raw_input(prompt)
+        # Py3 support
+        try:
+            answer = raw_input(prompt)
+        except (KeyboardInterrupt, EOFError):
+            print('\n')
+            print(os.path.basename(sys.argv[0]), 'was aborted.')
+            sys.exit(1)
+        return answer
 
     def read_password(self, prompt):
         # The tests replace this to make sure the right things happen.
@@ -144,7 +156,7 @@ class Application(object):
         except KeyboardInterrupt:
             # The cursor was left on the same line as the prompt,
             # which we don't like.  Print a blank line.
-            print
+            print()
             raise
 
     def process(self):
@@ -191,14 +203,14 @@ class Application(object):
     def get_password_manager(self):
         default = 0
         self.print_message("Password manager:")
-        print
+        print()
         managers = self.options.managers
 
         for i, (name, manager) in enumerate(managers):
             print("% i. %s" % (i + 1, name))
             if name == 'SSHA':
                 default = i
-        print
+        print()
         self.need_blank_line = True
         while True:
             password_manager = self.read_input_line(
@@ -234,7 +246,7 @@ class Application(object):
 
     def print_message(self, message):
         if self.need_blank_line:
-            print
+            print()
             self.need_blank_line = False
         print(message)
 
