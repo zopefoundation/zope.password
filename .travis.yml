@@ -9,6 +9,7 @@ python:
 #   - pypy3
 #   pending 3.3-compatible release
 install:
+    - if [[ $TRAVIS_PYTHON_VERSION != 'pypy'* ]]; then pip install bcrypt --use-mirrors; fi
     - pip install . --use-mirrors
 script:
     - python setup.py test -q
