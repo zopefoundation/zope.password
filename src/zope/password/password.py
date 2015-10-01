@@ -25,7 +25,7 @@ from os import urandom
 
 import bcrypt
 from zope.interface import implementer
-from zope.password.compat import bytes_type, text_type
+from zope.password.compat import text_type
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
@@ -477,16 +477,17 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
 
     # Subsequently hashing the same password will produce a different encoding
     >>> encoded2 = manager.encodePassword(password)
-    >>> encoded2 != password
+    >>> encoded2 != encoded
     True
 
-    # In order to generate thesame hash, the salt previsouly used is required;
-    # The last salt generated is remembered by the password manager,
-    # so we can re-use that to generate the same hash for the given password.
-    >>> encoded3 = manager.encodePassword(password, salt=manager.salt)
-
+    # In order to generate the same hash, the salt previsouly used is required;
+    >>> salt = manager.gensalt()
+    >>> encoded3 = manager.encodePassword(password, salt=salt)
+    >>> encoded4 = manager.encodePassword(password, salt=salt)
+    >>> encoded3 == encoded4
+    True
     >>> encoded3 == encoded2
-    True
+    False
     >>> manager.match(encoded3)
     True
     >>> manager.checkPassword(encoded3, password)
@@ -496,7 +497,6 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
 
     """
     _prefix = b'{BCRYPT}'
-    _salt = None
 
     def _to_bytes(self, password, encoding):
         if isinstance(password, text_type):
@@ -514,9 +514,7 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         deprefixed = hashed_pw[hashed_pw.find(b'}') + 1:]
         return (deprefixed[salt_offset:], deprefixed[:-salt_offset])
 
-    @property
-    def salt(self):
-        return self._salt
+    gensalt = staticmethod(bcrypt.gensalt)
 
     def checkPassword(self, hashed_password, clear_password):
         """Check a `hashed_password` against a `clear password`.
@@ -547,10 +545,8 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         :returns: The encoded password as a byte-siring.
         """
         if salt is None:
-            salt = bcrypt.gensalt()
-        elif isinstance(salt, text_type):
-            salt = salt.encode('utf-8')
-        self._salt = self._clean_hashed(salt)
+            salt = self.gensalt()
+        salt = self._clean_hashed(salt)
         pw = self._clean_clear(password)
         return self._prefix + bcrypt.hashpw(pw, salt=salt)
 
