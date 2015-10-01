@@ -106,7 +106,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
 
 
 def test_suite():
-    loader = unittest.TestLoader()
     suite = unittest.TestSuite((
         doctest.DocTestSuite('zope.password.password', checker=checker),
         doctest.DocTestSuite('zope.password.legacy', checker=checker),
@@ -114,5 +113,5 @@ def test_suite():
             'zope.password.testing',
             optionflags=doctest.ELLIPSIS, checker=checker),
         ))
-    suite.addTests(loader.loadTestsFromTestCase(TestBCRYPTPasswordManager))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite
