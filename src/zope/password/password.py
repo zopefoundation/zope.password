@@ -23,7 +23,11 @@ from codecs import getencoder
 from hashlib import md5, sha1
 from os import urandom
 
-import bcrypt
+try:
+    import bcrypt
+except ImportError:
+    bcrypt = None
+
 from zope.interface import implementer
 from zope.password.compat import text_type
 from zope.password.interfaces import IMatchingPasswordManager
@@ -454,109 +458,110 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             encoded_password.startswith(b'{SHA1}'))
 
 
-class BCRYPTPasswordManager(PlainTextPasswordManager):
-    """BCRYPT password manager.
+if bcrypt is not None:
 
-    >>> from zope.interface.verify import verifyObject
-    >>> from zope.password.interfaces import IMatchingPasswordManager
-    >>> from zope.password.password import BCRYPTPasswordManager
+        class BCRYPTPasswordManager(PlainTextPasswordManager):
+            """BCRYPT password manager.
 
-    >>> manager = BCRYPTPasswordManager()
-    >>> verifyObject(IMatchingPasswordManager, manager)
-    True
+            >>> from zope.interface.verify import verifyObject
+            >>> from zope.password.interfaces import IMatchingPasswordManager
+            >>> from zope.password.password import BCRYPTPasswordManager
 
-    # Hashing a password for the first time, with a randomly-generated salt
-    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    >>> encoded = manager.encodePassword(password)
-    >>> manager.match(encoded)
-    True
-    >>> manager.checkPassword(encoded, password)
-    True
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    False
+            >>> manager = BCRYPTPasswordManager()
+            >>> verifyObject(IMatchingPasswordManager, manager)
+            True
 
-    # Subsequently hashing the same password will produce a different encoding
-    >>> encoded2 = manager.encodePassword(password)
-    >>> encoded2 != encoded
-    True
+            # Hashing a password for the first time, with a
+            # randomly-generated salt
+            >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+            >>> encoded = manager.encodePassword(password)
+            >>> manager.match(encoded)
+            True
+            >>> manager.checkPassword(encoded, password)
+            True
+            >>> manager.checkPassword(encoded, password + u"wrong")
+            False
 
-    # In order to generate the same hash, the salt previsouly used is required;
-    >>> salt = manager.gensalt()
-    >>> encoded3 = manager.encodePassword(password, salt=salt)
-    >>> encoded4 = manager.encodePassword(password, salt=salt)
-    >>> encoded3 == encoded4
-    True
-    >>> encoded3 == encoded2
-    False
-    >>> manager.match(encoded3)
-    True
-    >>> manager.checkPassword(encoded3, password)
-    True
-    >>> manager.checkPassword(encoded3, password + u"wrong")
-    False
+            # Subsequently hashing the same password will produce a
+            # different encoding
+            >>> encoded2 = manager.encodePassword(password)
+            >>> encoded2 != encoded
+            True
 
-    """
-    _prefix = b'{BCRYPT}'
+            # Both matching and checking will work against both
+            >>> manager.match(encoded)
+            True
+            >>> manager.match(encoded2)
+            True
+            >>> manager.checkPassword(encoded, password)
+            True
+            >>> manager.checkPassword(encoded2, password)
+            True
+            >>> manager.checkPassword(encoded2, password + u"wrong")
+            False
 
-    def _to_bytes(self, password, encoding):
-        if isinstance(password, text_type):
-            return password.encode(encoding)
-        return password
+            """
+            _prefix = b'{BCRYPT}'
 
-    def _clean_clear(self, password):
-        return self._to_bytes(password, 'utf-8')
+            def _to_bytes(self, password, encoding):
+                if isinstance(password, text_type):
+                    return password.encode(encoding)
+                return password
 
-    def _clean_hashed(self, hashed_password):
-        return self._to_bytes(hashed_password, 'ascii')
+            def _clean_clear(self, password):
+                return self._to_bytes(password, 'utf-8')
 
-    gensalt = staticmethod(bcrypt.gensalt)
+            def _clean_hashed(self, hashed_password):
+                return self._to_bytes(hashed_password, 'ascii')
 
-    def checkPassword(self, hashed_password, clear_password):
-        """Check a `hashed_password` against a `clear password`.
+            gensalt = staticmethod(bcrypt.gensalt)
 
-        :param hashed_password: The encoded password.
-        :type hashed_password: str
-        :param clear_password: The password to check.
-        :type clear_password: unicode
-        :returns: True iif hashed passwords are equal.
-        :rtype: bool
-        """
-        if not self.match(hashed_password):
-            return False
-        pw_bytes = self._clean_clear(clear_password)
-        pw_hash = hashed_password[len(self._prefix):]
-        try:
-            return bcrypt.hashpw(pw_bytes, pw_hash) == pw_hash
-        except ValueError:
-            return False
+            def checkPassword(self, hashed_password, clear_password):
+                """Check a `hashed_password` against a `clear password`.
 
-    def encodePassword(self, password, salt=None):
-        """Encode a `password`, with an optional `salt`.
+                :param hashed_password: The encoded password.
+                :type hashed_password: str
+                :param clear_password: The password to check.
+                :type clear_password: unicode
+                :returns: True iif hashed passwords are equal.
+                :rtype: bool
+                """
+                if not self.match(hashed_password):
+                    return False
+                pw_bytes = self._clean_clear(clear_password)
+                pw_hash = hashed_password[len(self._prefix):]
+                try:
+                    return bcrypt.hashpw(pw_bytes, pw_hash) == pw_hash
+                except ValueError:
+                    return False
 
-        If `salt` is not provided, a unique hash will be generated
-        for each invokation.
+            def encodePassword(self, password, salt=None):
+                """Encode a `password`, with an optional `salt`.
 
-        :param password: The clear-text password.
-        :type password: unicode
-        :param salt: The salt to be used to hash the password.
-        :rtype: str
-        :returns: The encoded password as a byte-siring.
-        """
-        if salt is None:
-            salt = self.gensalt()
-        salt = self._clean_hashed(salt)
-        pw = self._clean_clear(password)
-        return self._prefix + bcrypt.hashpw(pw, salt=salt)
+                If `salt` is not provided, a unique hash will be generated
+                for each invokation.
 
-    def match(self, hashed_password):
-        """Was the password hashed with this password manager.
+                :param password: The clear-text password.
+                :type password: unicode
+                :param salt: The salt to be used to hash the password.
+                :rtype: str
+                :returns: The encoded password as a byte-siring.
+                """
+                if salt is None:
+                    salt = self.gensalt()
+                salt = self._clean_hashed(salt)
+                pw = self._clean_clear(password)
+                return self._prefix + bcrypt.hashpw(pw, salt=salt)
 
-        :param hashed_password: The encoded password.
-        :type hashed_password: str
-        :rtype: bool
-        :returns: True iif the password was hashed with this manager.
-        """
-        return hashed_password.startswith(self._prefix)
+            def match(self, hashed_password):
+                """Was the password hashed with this password manager.
+
+                :param hashed_password: The encoded password.
+                :type hashed_password: str
+                :rtype: bool
+                :returns: True iif the password was hashed with this manager.
+                """
+                return hashed_password.startswith(self._prefix)
 
 
 # Simple registry
@@ -566,5 +571,7 @@ managers = [
     ('SMD5', SMD5PasswordManager()),
     ('SHA1', SHA1PasswordManager()),
     ('SSHA', SSHAPasswordManager()),
-    ('BCRYPT', BCRYPTPasswordManager()),
 ]
+
+if bcrypt is not None:
+    managers.append(('BCRYPT', BCRYPTPasswordManager()))

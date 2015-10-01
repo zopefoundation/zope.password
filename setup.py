@@ -41,10 +41,10 @@ setup(name='zope.password',
       author_email='zope-dev@zope.org',
       description='Password encoding and checking utilities',
       long_description=(
-        read('README.rst')
-        + '\n\n' +
-        read('CHANGES.rst')
-        ),
+          read('README.rst')
+          + '\n\n' +
+          read('CHANGES.rst')
+          ),
       url='http://pypi.python.org/pypi/zope.password',
       license='ZPL 2.1',
       classifiers = [
@@ -67,25 +67,25 @@ setup(name='zope.password',
           'Framework :: Zope3'],
       keywords='zope authentication password zpasswd',
       packages=find_packages('src'),
-      package_dir = {'': 'src'},
+      package_dir={'': 'src'},
       extras_require=dict(vocabulary=['zope.schema'],
                           test=['zope.schema', 'zope.testing'],
+                          bcrypt=['bcrypt'],
                           ),
       namespace_packages=['zope'],
       install_requires=['setuptools',
-                        'bcrypt',
                         'zope.component',
                         'zope.configuration',
                         'zope.interface',
                         ],
-      tests_require = [
+      tests_require=[
           'zope.schema',
           'zope.testing',
           'zope.testrunner',
           ],
-      test_suite = '__main__.alltests',
-      include_package_data = True,
-      zip_safe = False,
+      test_suite='__main__.alltests',
+      include_package_data=True,
+      zip_safe=False,
       entry_points="""
       [console_scripts]
       zpasswd = zope.password.zpasswd:main

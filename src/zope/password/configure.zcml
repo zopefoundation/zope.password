@@ -39,12 +39,20 @@
       factory=".legacy.MySQLPasswordManager"
       />
 
+  <configure zcml:condition="installed bcrypt">
+    <utility
+       name="BCRYPT"
+       provides=".interfaces.IMatchingPasswordManager"
+       factory=".password.BCRYPTPasswordManager"
+       />
+  </configure>
+
   <configure zcml:condition="installed crypt">
-  <utility
-      name="Crypt"
-      provides=".interfaces.IMatchingPasswordManager"
-      factory=".legacy.CryptPasswordManager"
-      />
+    <utility
+        name="Crypt"
+        provides=".interfaces.IMatchingPasswordManager"
+        factory=".legacy.CryptPasswordManager"
+        />
   </configure>
 
   <utility
@@ -58,19 +66,19 @@
     <class class=".password.PlainTextPasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
-  
+
     <class class=".password.MD5PasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
-  
+
     <class class=".password.SMD5PasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
-  
+
     <class class=".password.SHA1PasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
-  
+
     <class class=".password.SSHAPasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
@@ -78,6 +86,12 @@
     <class class=".legacy.MySQLPasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
+
+    <configure zcml:condition="isntalled bcrypt">
+      <class class=".password.BCRYPTPasswordManager">
+        <allow interface=".interfaces.IMatchingPasswordManager" />
+      </class>
+    </configure>
 
     <configure zcml:condition="installed crypt">
       <class class=".legacy.CryptPasswordManager">
