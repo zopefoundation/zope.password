@@ -139,12 +139,13 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        # Py3 support
         try:
             answer = raw_input(prompt)
         except (KeyboardInterrupt, EOFError):
-            print('\n')
-            print(os.path.basename(sys.argv[0]), 'was aborted.')
+            print(file=sys.stderr)
+            print(os.path.basename(sys.argv[0]),
+                  'was aborted.',
+                  file=sys.stderr)
             sys.exit(1)
         return answer
 
