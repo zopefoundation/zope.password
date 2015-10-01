@@ -92,7 +92,7 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
     def test_checkPassword(self):
         encoded = (
             b'{BCRYPT}'
-            b'$2a$12$58tzOTIlN5FJfgCqC.zIbu0WF8KKIMOaDmdLWGHDEVd5lwRRTCd.y'
+            b'$2b$12$ez4eHl6W1PfAWix5bPIbe.drdnyqjpuT1Cp0N.xcdxkAEbA7K6AHK'
         )
         pw_mgr = self._make_one()
         self.assertTrue(pw_mgr.checkPassword(encoded, self.password))

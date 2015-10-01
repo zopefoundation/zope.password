@@ -509,11 +509,6 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     def _clean_hashed(self, hashed_password):
         return self._to_bytes(hashed_password, 'ascii')
 
-    def _unwind_hashed(self, hashed_password, salt_offset=29):
-        hashed_pw = self._clean_hashed(hashed_password)
-        deprefixed = hashed_pw[hashed_pw.find(b'}') + 1:]
-        return (deprefixed[salt_offset:], deprefixed[:-salt_offset])
-
     gensalt = staticmethod(bcrypt.gensalt)
 
     def checkPassword(self, hashed_password, clear_password):
@@ -526,11 +521,14 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         :returns: True iif hashed passwords are equal.
         :rtype: bool
         """
+        if not self.match(hashed_password):
+            return False
         pw_bytes = self._clean_clear(clear_password)
-        (a_hash, a_salt) = self._unwind_hashed(hashed_password)
-        rehashed = self.encodePassword(pw_bytes, salt=a_salt)
-        b_hash = self._unwind_hashed(rehashed)[0]
-        return a_hash == b_hash
+        pw_hash = hashed_password[len(self._prefix):]
+        try:
+            return bcrypt.hashpw(pw_bytes, pw_hash) == pw_hash
+        except ValueError:
+            return False
 
     def encodePassword(self, password, salt=None):
         """Encode a `password`, with an optional `salt`.
