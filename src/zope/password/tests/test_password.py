@@ -40,13 +40,9 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
 
     password = u'Close \N{GREEK SMALL LETTER PHI}ncounterS 0f tHe Erd K1nd'
 
-    def _get_target_class(self):
-        from zope.password.password import BCRYPTPasswordManager
-        return BCRYPTPasswordManager
-
     def _make_one(self):
-        cls = self._get_target_class()
-        return cls()
+        from zope.password.password import BCRYPTPasswordManager
+        return BCRYPTPasswordManager()
 
     def test_interface_compliance(self):
         pw_mgr = self._make_one()
