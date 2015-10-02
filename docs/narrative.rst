@@ -189,7 +189,7 @@ A typical :command:`zpasswd` session might look like:
        id="foo"
        title="The Foo"
        login="foo"
-       password="{BCRYPT}$2b$12$ez4eHl6W1PfAWix5bPIbe.drdnyqjpuT1Cp0N.xcdxkAEbA7K6AHK"
+       password="$2b$12$ez4eHl6W1PfAWix5bPIbe.drdnyqjpuT1Cp0N.xcdxkAEbA7K6AHK"
        description="The main foo"
        password_manager="BCRYPT"
        />
