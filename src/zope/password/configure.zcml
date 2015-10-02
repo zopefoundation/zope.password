@@ -87,7 +87,7 @@
       <allow interface=".interfaces.IMatchingPasswordManager" />
     </class>
 
-    <configure zcml:condition="isntalled bcrypt">
+    <configure zcml:condition="installed bcrypt">
       <class class=".password.BCRYPTPasswordManager">
         <allow interface=".interfaces.IMatchingPasswordManager" />
       </class>
