@@ -121,7 +121,5 @@ def test_suite():
             optionflags=doctest.ELLIPSIS, checker=checker),
         ))
     if bcrypt is not None:
-        suite.addTests(
-            unittest.defaultTestLoader.loadTestsFromTestCase(
-                TestBCRYPTPasswordManager))
+        suite.addTests(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite
