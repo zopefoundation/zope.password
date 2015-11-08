@@ -7,6 +7,8 @@ Changes
 - Converted documentation to Sphinx, including testing doctest snippets
   under ``tox``.
 
+- Claim support for Python 3.5.
+
 
 4.1.0 (2014-12-27)
 ------------------
