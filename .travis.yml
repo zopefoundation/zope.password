@@ -9,7 +9,7 @@ python:
 #   - pypy3
 #   pending 3.3-compatible release
 install:
-    - pip install . --use-mirrors
+    - pip install .
 script:
     - python setup.py test -q
 notifications:
