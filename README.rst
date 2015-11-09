@@ -1,7 +1,7 @@
 ``zope.password``
 =================
 
-.. image:: https://pypip.in/version/zope.password/badge.svg?style=flat
+.. image:: https://img.shields.io/pypi/v/zope.password.svg
     :target: https://pypi.python.org/pypi/zope.password/
     :alt: Latest Version
 
