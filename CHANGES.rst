@@ -1,13 +1,15 @@
 Changes
 =======
 
-4.1.1 (unreleased)
+4.2.0 (unreleased)
 ------------------
+
+- Drop support for Python 2.6.
 
 - Converted documentation to Sphinx, including testing doctest snippets
   under ``tox``.
 
-- Claim support for Python 3.5.
+- Add support for Python 3.5.
 
 
 4.1.0 (2014-12-27)
