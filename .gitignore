@@ -11,3 +11,4 @@ build
 develop-eggs
 parts
 docs/_build/
+dist/
