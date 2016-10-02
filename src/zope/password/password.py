@@ -514,8 +514,6 @@ if bcrypt is not None:
             def _clean_hashed(self, hashed_password):
                 return self._to_bytes(hashed_password, 'ascii')
 
-            gensalt = staticmethod(bcrypt.gensalt)
-
             def checkPassword(self, hashed_password, clear_password):
                 """Check a `hashed_password` against a `clear password`.
 
@@ -550,7 +548,7 @@ if bcrypt is not None:
                 :returns: The encoded password as a byte-siring.
                 """
                 if salt is None:
-                    salt = self.gensalt()
+                    salt = bcrypt.gensalt()
                 salt = self._clean_hashed(salt)
                 pw = self._clean_clear(password)
                 return self._prefix + bcrypt.hashpw(pw, salt=salt)
