@@ -249,7 +249,7 @@ def get_password_managers(config_path=None):
         from zope.password.interfaces import IPasswordManager
 
         print("Loading configuration...")
-        config = xmlconfig.file(config_path)
+        xmlconfig.file(config_path)
         managers = []
         for name, manager in getUtilitiesFor(IPasswordManager):
             if name == "Plain Text":
