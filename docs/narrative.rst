@@ -4,7 +4,7 @@ Using :mod:`zope.password`
 This package provides a password manager mechanism. Password manager
 is an utility object that can encode and check encoded
 passwords. Beyond the generic interface, this package also provides
-seven implementations:
+eight implementations:
 
 :class:`zope.password.password.PlainTextPasswordManager`
 
@@ -31,9 +31,9 @@ seven implementations:
 
 :class:`zope.password.password.SSHAPasswordManager`
 
-   the most secure password manager that is strong against dictionary
-   attacks. It's basically SHA1-encoding password manager which also
-   incorporates a salt into the password when encoding it.
+   A password manager that is strong against dictionary attacks. It's
+   basically SHA1-encoding password manager which also incorporates a
+   salt into the password when encoding it.
 
 :class:`zope.password.password.CryptPasswordManager`
 
@@ -48,16 +48,22 @@ seven implementations:
    PASSWORD function in MySQL versions before 4.1.  Note that this method
    results in a very weak 16-byte hash.
 
+:class:`zope.password.password.BCRYPTPasswordManager`
+
+   A manager implementing the bcrypt hashing scheme. Only available if
+   the bcrypt_ module is installed.  This manager is considered the
+   most secure.
+
 The ``Crypt``, ``MD5``, ``SMD5``, ``SHA`` and ``SSHA`` password managers
 are all compatible with RFC 2307 LDAP implementations of the same password
 encoding schemes.
 
-.. note:: 
-   It is strongly recommended to use SSHAPasswordManager, as it's the
+.. note::
+   It is strongly recommended to use the BCRYPTPasswordManager, as it's the
    most secure.
 
-The package also provides a script, :command:`zpasswd`,to generate principal
-entries in typical ``site.zcml`` files.
+The package also provides a script, :command:`zpasswd`, to generate
+principal entries in typical ``site.zcml`` files.
 
 Password Manager Interfaces
 ---------------------------
@@ -138,7 +144,7 @@ A typical :command:`zpasswd` session might look like:
 
 .. code-block:: sh
 
-   $ ./bin/zpasswd 
+   $ ./bin/zpasswd
 
    Please choose an id for the principal.
 
@@ -158,21 +164,23 @@ A typical :command:`zpasswd` session might look like:
 
     1. Plain Text
     2. MD5
-    3. SHA1
-    4. SSHA
+    3. SMD5
+    4. SHA1
+    5. SSHA
+    6. BCRYPT
 
-   Password Manager Number [4]: 
-   SSHA password manager selected
+   Password Manager Number [6]:
+   BCRYPT password manager selected
 
 
    Please provide a password for the principal.
 
-   Password: 
-   Verify password: 
+   Password:
+   Verify password:
 
    Please provide an optional description for the principal.
 
-   Description: The main foo 
+   Description: The main foo
 
    ============================================
    Principal information for inclusion in ZCML:
@@ -181,7 +189,9 @@ A typical :command:`zpasswd` session might look like:
        id="foo"
        title="The Foo"
        login="foo"
-       password="{SSHA}Zi_Lsz7Na3bS5rz4Aer-9TbqomXD2f3T"
+       password="$2b$12$ez4eHl6W1PfAWix5bPIbe.drdnyqjpuT1Cp0N.xcdxkAEbA7K6AHK"
        description="The main foo"
-       password_manager="SSHA"
+       password_manager="BCRYPT"
        />
+
+.. _bcrypt: https://pypi.python.org/pypi/bcrypt

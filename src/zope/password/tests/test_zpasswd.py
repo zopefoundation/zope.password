@@ -13,10 +13,10 @@
 ##############################################################################
 """Tests for the zpasswd script.
 """
-
+import doctest
 import os
 import sys
-import unittest, doctest
+import unittest
 
 try:
     from StringIO import StringIO
@@ -25,6 +25,7 @@ except ImportError:
     from io import StringIO
 
 from zope.password import password, zpasswd
+
 
 class TestBase(unittest.TestCase):
     def setUp(self):
@@ -59,7 +60,7 @@ class ArgumentParsingTestCase(TestBase):
 
     def check_stdout_content(self, args):
         try:
-            options = self.parse_args(args)
+            self.parse_args(args)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
             self.assertTrue(self.stdout.getvalue())

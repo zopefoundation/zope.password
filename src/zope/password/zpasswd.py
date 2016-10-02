@@ -196,7 +196,9 @@ class Application(object):
 
         for i, (name, manager) in enumerate(managers):
             print("% i. %s" % (i + 1, name))
-            if name == 'SSHA':
+            if name == 'BCRYPT':
+                default = i
+            elif name == 'SSHA' and not default:
                 default = i
         print
         self.need_blank_line = True
