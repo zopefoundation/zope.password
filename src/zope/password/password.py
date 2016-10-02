@@ -531,9 +531,11 @@ if bcrypt is not None:
                 pw_bytes = self._clean_clear(clear_password)
                 pw_hash = hashed_password[len(self._prefix):]
                 try:
-                    return bcrypt.hashpw(pw_bytes, pw_hash) == pw_hash
+                    ok = bcrypt.checkpw(pw_bytes, pw_hash)
                 except ValueError:
-                    return False
+                    # invalid salt
+                    ok = False
+                return ok
 
             def encodePassword(self, password, salt=None):
                 """Encode a `password`, with an optional `salt`.
