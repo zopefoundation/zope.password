@@ -103,7 +103,8 @@ if bcrypt is not None:
             )
             pw_mgr = self._make_one()
             self.assertTrue(pw_mgr.checkPassword(encoded, self.password))
-            encoded += b'wrong'
+            # Mess with the hashed password, should not match
+            encoded = encoded[:-1]
             self.assertFalse(pw_mgr.checkPassword(encoded, self.password))
 
         def test_match(self):
