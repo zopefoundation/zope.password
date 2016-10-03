@@ -144,7 +144,7 @@ class Application(object):
         except KeyboardInterrupt:
             # The cursor was left on the same line as the prompt,
             # which we don't like.  Print a blank line.
-            print
+            print()
             raise
 
     def process(self):
@@ -191,14 +191,16 @@ class Application(object):
     def get_password_manager(self):
         default = 0
         self.print_message("Password manager:")
-        print
+        print()
         managers = self.options.managers
 
         for i, (name, manager) in enumerate(managers):
             print("% i. %s" % (i + 1, name))
-            if name == 'SSHA':
+            if name == 'BCRYPT':
                 default = i
-        print
+            elif name == 'SSHA' and not default:
+                default = i
+        print()
         self.need_blank_line = True
         while True:
             password_manager = self.read_input_line(
@@ -234,7 +236,7 @@ class Application(object):
 
     def print_message(self, message):
         if self.need_blank_line:
-            print
+            print()
             self.need_blank_line = False
         print(message)
 
@@ -247,7 +249,7 @@ def get_password_managers(config_path=None):
         from zope.password.interfaces import IPasswordManager
 
         print("Loading configuration...")
-        config = xmlconfig.file(config_path)
+        xmlconfig.file(config_path)
         managers = []
         for name, manager in getUtilitiesFor(IPasswordManager):
             if name == "Plain Text":
