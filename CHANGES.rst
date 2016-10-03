@@ -4,7 +4,8 @@ Changes
 4.2.1 (unreleased)
 ------------------
 
-- TBD
+- Added a ``bcrypt``-based password manager (available only if the ``bcrypt``
+  library is importable).
 
 
 4.2.0 (2016-07-07)
