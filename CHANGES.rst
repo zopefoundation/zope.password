@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.2.1 (unreleased)
+4.3.0 (unreleased)
 ------------------
 
 - Added a ``bcrypt``-based password manager (available only if the ``bcrypt``
