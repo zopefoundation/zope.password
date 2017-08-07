@@ -64,6 +64,12 @@ if crypt is not None:
         >>> manager.checkPassword(encoded, password)
         True
 
+        Note that this object fails to return bytes from the ``encodePassword``
+        function on Python 3:
+
+        >>> isinstance(encoded, str)
+        True
+
         Unfortunately, crypt only looks at the first 8 characters, so matching
         against an 8 character password plus suffix always matches. Our test
         password (including utf-8 encoding) is exactly 8 characters long, and
@@ -120,7 +126,7 @@ if crypt is not None:
 
         def checkPassword(self, encoded_password, password):
             return encoded_password == self.encodePassword(password,
-                encoded_password[7:9])
+                                                           encoded_password[7:9])
 
         def match(self, encoded_password):
             return encoded_password.startswith('{CRYPT}')
@@ -144,8 +150,10 @@ class MySQLPasswordManager(object):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    '{MYSQL}0ecd752c5097d395'
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {MYSQL}0ecd752c5097d395
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -162,8 +170,10 @@ class MySQLPasswordManager(object):
 
     >>> password = 'PHP & Information Security'
     >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    '{MYSQL}379693e271cd3bd6'
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {MYSQL}379693e271cd3bd6
 
     >>> manager.checkPassword(encoded, password)
     True

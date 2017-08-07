@@ -31,12 +31,7 @@ from zope.password.interfaces import IMatchingPasswordManager
 from zope.password.compat import bytes_type, text_type
 
 checker = renormalizing.RENormalizing([
-    # Python 3 bytes add a "b".
-    (re.compile("b('.*?')"),
-     r"\1"),
-    (re.compile('b(".*?")'),
-     r"\1"),
-    ])
+])
 
 
 skip_if_bcrypt_not_installed = unittest.skipIf(

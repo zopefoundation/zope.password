@@ -105,8 +105,10 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password, salt="")
-    >>> encoded
-    '{SSHA}BLTuxxVMXzouxtKVb7gLgNxzdAI='
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SSHA}BLTuxxVMXzouxtKVb7gLgNxzdAI=
 
     >>> manager.match(encoded)
     True
@@ -126,8 +128,10 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     >>> salt = standard_b64decode('ja/vZQ==')
     >>> password = 'secret'
     >>> encoded = manager.encodePassword(password, salt)
-    >>> encoded
-    '{SSHA}x3HIoiF9y6YRi/I4W1fkptbzTDiNr+9l'
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SSHA}x3HIoiF9y6YRi/I4W1fkptbzTDiNr+9l
 
     >>> manager.checkPassword(encoded, password)
     True
@@ -213,8 +217,10 @@ class SMD5PasswordManager(PlainTextPasswordManager):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password, salt="")
-    >>> encoded
-    '{SMD5}ht3czsRdtFmfGsAAGOVBOQ=='
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SMD5}ht3czsRdtFmfGsAAGOVBOQ==
 
     >>> manager.match(encoded)
     True
@@ -234,8 +240,10 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     >>> salt = standard_b64decode('9XkpYA==')
     >>> password = 'secret'
     >>> encoded = manager.encodePassword(password, salt)
-    >>> encoded
-    '{SMD5}zChC6x0tl2zr9fjvjZzKePV5KWA='
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SMD5}zChC6x0tl2zr9fjvjZzKePV5KWA=
 
     >>> manager.checkPassword(encoded, password)
     True
@@ -299,8 +307,10 @@ class MD5PasswordManager(PlainTextPasswordManager):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    '{MD5}ht3czsRdtFmfGsAAGOVBOQ=='
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {MD5}ht3czsRdtFmfGsAAGOVBOQ==
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -313,8 +323,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     a MD5 hashing of ``secret`` is ``{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==``,
     and our implementation returns the same hash:
 
-    >>> manager.encodePassword('secret')
-    '{MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ=='
+    >>> print(manager.encodePassword('secret').decode())
+    {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
 
     The password manager should be able to cope with unicode strings for input:
 
@@ -375,8 +385,10 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
     >>> encoded = manager.encodePassword(password)
-    >>> encoded
-    '{SHA}BLTuxxVMXzouxtKVb7gLgNxzdAI='
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SHA}BLTuxxVMXzouxtKVb7gLgNxzdAI=
     >>> manager.match(encoded)
     True
     >>> manager.checkPassword(encoded, password)
@@ -389,8 +401,8 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     a SHA hashing of ``secret`` is ``{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=``,
     and our implementation returns the same hash:
 
-    >>> manager.encodePassword('secret')
-    '{SHA}5en6G6MezRroT3XKqkdPOmY/BfQ='
+    >>> print(manager.encodePassword('secret').decode())
+    {SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=
 
     The password manager should be able to cope with unicode strings for input:
 
