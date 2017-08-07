@@ -1,15 +1,19 @@
-Changes
-=======
+=========
+ Changes
+=========
 
 4.3.0 (unreleased)
-------------------
+==================
 
 - Added a ``bcrypt``-based password manager (available only if the ``bcrypt``
   library is importable).
 
+- Add support for Python 3.6.
+
+- Drop support for Python 3.3.
 
 4.2.0 (2016-07-07)
-------------------
+==================
 
 - Drop support for Python 2.6.
 
@@ -20,7 +24,7 @@ Changes
 
 
 4.1.0 (2014-12-27)
-------------------
+==================
 
 - Add support for PyPy.  (PyPy3 is pending release of a fix for:
   https://bitbucket.org/pypy/pypy/issue/1946)
@@ -31,19 +35,19 @@ Changes
 
 
 4.0.2 (2013-03-11)
-------------------
+==================
 
 - Fix some final resource warnings.
 
 
 4.0.1 (2013-03-10)
-------------------
+==================
 
 - Fix test failures under Python 3.3 when warnings are enabled.
 
 
 4.0.0 (2013-02-21)
-------------------
+==================
 
 - Make ``zpasswd`` a proper console script entry point.
 
@@ -84,7 +88,7 @@ Changes
   to maintain compatibility with LDAP.
 
 3.6.1 (2010-05-27)
-------------------
+==================
 
 - The SSHAPasswordManager.checkPassword() would not handle unicode input
   (even if the string would only contain ascii characters). Now, the
@@ -92,7 +96,7 @@ Changes
   as it should not contain non-ascii characters anyway.
 
 3.6.0 (2010-05-07)
-------------------
+==================
 
 - Remove ``zope.testing`` dependency for tests.
 
@@ -103,7 +107,7 @@ Changes
   manager, now SSHA is used as default.
 
 3.5.1 (2009-03-14)
-------------------
+==================
 
 - Make security protection directives in ``configure.zcml`` execute only
   if ``zope.security`` is installed. This will allow reuse of the
@@ -116,7 +120,7 @@ Changes
   "vocabulary" extra to list dependencies needed for vocabulary functionality.
 
 3.5.0 (2009-03-06)
-------------------
+==================
 
 First release. This package was splitted off from ``zope.app.authentication``
 to separate password manager functionality that is greatly re-usable without
