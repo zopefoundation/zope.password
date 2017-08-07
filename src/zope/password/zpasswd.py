@@ -20,6 +20,11 @@ import pkg_resources
 import sys
 from xml.sax.saxutils import quoteattr
 
+if sys.version_info[0] < 3:
+    ask = raw_input
+else:
+    ask = input
+
 VERSION = pkg_resources.get_distribution('zope.password').version
 
 def main(argv=None):
@@ -134,7 +139,15 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        return raw_input(prompt)
+        try:
+            answer = raw_input(prompt)
+        except (KeyboardInterrupt, EOFError):
+            print(file=sys.stderr)
+            print(os.path.basename(sys.argv[0]),
+                  'was aborted.',
+                  file=sys.stderr)
+            sys.exit(1)
+        return answer
 
     def read_password(self, prompt):
         # The tests replace this to make sure the right things happen.
