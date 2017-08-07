@@ -5,7 +5,10 @@ python:
     - 3.4
     - 3.5
     - 3.6
-    - pypy
+    # Force a newer PyPy on the old 'precise' CI image.
+    # After September 2017 this should be the default and the version
+    # pin can be removed.
+    - pypy-5.6.0
     - pypy3.5-5.8.0
 install:
     - pip install -U pip setuptools
