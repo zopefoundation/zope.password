@@ -25,7 +25,7 @@ from os import urandom
 
 try:
     import bcrypt
-except ImportError:
+except ImportError: # pragma: no cover
     bcrypt = None
 
 from zope.interface import implementer
@@ -112,6 +112,8 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     >>> manager.match(encoded)
     True
+    >>> manager.match(encoded.decode())
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -137,6 +139,16 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
+
+    We can also pass a salt that is a text string:
+
+    >>> salt = u'salt'
+    >>> password = 'secret'
+    >>> encoded = manager.encodePassword(password, salt)
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SSHA}gVK8WC9YyFT1gMsQHTGCgT3sSv5zYWx0
 
     Because a random salt is generated, the output of encodePassword is
     different every time you call it.
@@ -224,6 +236,8 @@ class SMD5PasswordManager(PlainTextPasswordManager):
 
     >>> manager.match(encoded)
     True
+    >>> manager.match(encoded.decode())
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -249,6 +263,16 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
+
+    We can also pass a salt that is a text string:
+
+    >>> salt = u'salt'
+    >>> password = 'secret'
+    >>> encoded = manager.encodePassword(password, salt)
+    >>> isinstance(encoded, bytes)
+    True
+    >>> print(encoded.decode())
+    {SMD5}mc0uWpXVVe5747A4pKhGJXNhbHQ=
 
     Because a random salt is generated, the output of encodePassword is
     different every time you call it.
@@ -312,6 +336,8 @@ class MD5PasswordManager(PlainTextPasswordManager):
     >>> print(encoded.decode())
     {MD5}ht3czsRdtFmfGsAAGOVBOQ==
     >>> manager.match(encoded)
+    True
+    >>> manager.match(encoded.decode())
     True
     >>> manager.checkPassword(encoded, password)
     True
@@ -390,6 +416,8 @@ class SHA1PasswordManager(PlainTextPasswordManager):
     >>> print(encoded.decode())
     {SHA}BLTuxxVMXzouxtKVb7gLgNxzdAI=
     >>> manager.match(encoded)
+    True
+    >>> manager.match(encoded.decode())
     True
     >>> manager.checkPassword(encoded, password)
     True
@@ -489,6 +517,11 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     def checkPassword(self, hashed_password, clear_password):
         """Check a `hashed_password` against a `clear password`.
 
+        >>> from zope.password.password import BCRYPTPasswordManager
+        >>> manager = BCRYPTPasswordManager()
+        >>> manager.checkPassword(b'not from here', None)
+        False
+
         :param hashed_password: The encoded password.
         :type hashed_password: str
         :param clear_password: The password to check.
@@ -502,7 +535,7 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         pw_hash = hashed_password[len(self._prefix):]
         try:
             ok = bcrypt.checkpw(pw_bytes, pw_hash)
-        except ValueError:
+        except ValueError: # pragma: no cover
             # invalid salt
             ok = False
         return ok
@@ -526,7 +559,7 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         return self._prefix + bcrypt.hashpw(pw, salt=salt)
 
     def match(self, hashed_password):
-        """Was the password hashed with this password manager.
+        """Was the password hashed with this password manager?
 
         :param hashed_password: The encoded password.
         :type hashed_password: str

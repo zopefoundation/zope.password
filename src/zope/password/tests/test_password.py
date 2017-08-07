@@ -16,13 +16,9 @@
 """
 import contextlib
 import doctest
-import re
 import unittest
 
-try:
-    import bcrypt
-except ImportError:
-    bcrypt = None
+import bcrypt
 
 from zope.interface.verify import verifyObject
 from zope.testing import renormalizing

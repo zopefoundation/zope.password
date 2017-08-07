@@ -16,24 +16,29 @@
 from __future__ import print_function
 import optparse
 import os
-import pkg_resources
 import sys
 from xml.sax.saxutils import quoteattr
 
+import pkg_resources
+
 VERSION = pkg_resources.get_distribution('zope.password').version
 
-def main(argv=None):
+def main(argv=None, app_factory=None):
     """Top-level script function to create a new principals."""
-    if argv is None:
-        argv = sys.argv
+    argv = sys.argv if argv is None else argv
+
     try:
         options = parse_args(argv)
     except SystemExit as e:
         if e.code:
             return 2
-        else:
-            return 0
-    app = Application(options)
+        return 0
+
+    return run_app_with_options(options, app_factory)
+
+def run_app_with_options(options, app_factory=None):
+    app = Application if app_factory is None else app_factory
+    app = app(options)
     try:
         return app.process()
     except KeyboardInterrupt:
@@ -67,7 +72,7 @@ class Principal(object):
     """
 
     def __init__(self, id, title, login, password,
-            description="", password_manager_name="Plain Text"):
+                 description="", password_manager_name="Plain Text"):
         self.id = id
         self.login = login
         self.password = password
@@ -87,7 +92,7 @@ class Principal(object):
             lines.append('    description=%s' % quoteattr(self.description))
         if self.password_manager_name != "Plain Text":
             lines.append('    password_manager=%s'
-                % quoteattr(self.password_manager_name))
+                         % quoteattr(self.password_manager_name))
         lines.append('    />')
         return lines
 
@@ -134,7 +139,8 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        return raw_input(prompt)
+        read = raw_input if bytes is str else input
+        return read(prompt)
 
     def read_password(self, prompt):
         # The tests replace this to make sure the right things happen.
@@ -150,33 +156,33 @@ class Application(object):
     def process(self):
         options = self.options
 
-        if not options.destination:
-            destination = sys.stdout
-        else:
-            destination = open(options.destination, "wb")
+        destination = sys.stdout if not options.destination else open(options.destination, 'w')
+        try:
+            principal = self.get_principal()
 
-        principal = self.get_principal()
-
-        if destination is sys.stdout:
-            print(self.title)
-        print(principal, file=destination)
-        print()
+            if destination is sys.stdout:
+                print(self.title)
+            print(principal, file=destination)
+            print()
+        finally:
+            if destination is not sys.stdout:
+                destination.close()
 
         return 0
 
     def get_principal(self):
         id = self.get_value(self.id_title, "Id: ", "Id may not be empty")
         title = self.get_value(self.title_title, "Title: ",
-            "Title may not be empty")
+                               "Title may not be empty")
         login = self.get_value(self.login_title, "Login: ",
-            "Login may not be empty")
+                               "Login may not be empty")
         password_manager_name, password_manager = self.get_password_manager()
         password = self.get_password()
         description = self.get_value(self.description_title, "Description: ",)
 
         password = password_manager.encodePassword(password)
         return Principal(id, title, login, password, description,
-            password_manager_name)
+                         password_manager_name)
 
     def get_value(self, title, prompt, error=""):
         self.print_message(title)
@@ -241,9 +247,11 @@ class Application(object):
         print(message)
 
 def get_password_managers(config_path=None):
-    if not config_path:
-        from zope.password.password import managers
-    else:
+    from zope.password.password import managers as default_managers
+
+    managers = default_managers
+
+    if config_path:
         from zope.configuration import xmlconfig
         from zope.component import getUtilitiesFor
         from zope.password.interfaces import IPasswordManager
@@ -256,22 +264,21 @@ def get_password_managers(config_path=None):
                 managers.insert(0, (name, manager))
             else:
                 managers.append((name, manager))
-        if not managers:
-            from zope.password.password import managers
-    return managers
+
+    return managers or default_managers
 
 def parse_args(argv):
     """Parse the command line, returning an object representing the input."""
-    path, prog = os.path.split(os.path.realpath(argv[0]))
+    _path, prog = os.path.split(os.path.realpath(argv[0]))
     p = optparse.OptionParser(prog=prog,
                               usage="%prog [options]",
                               version=VERSION)
     p.add_option("-c", "--config", dest="config", metavar="FILE",
-        help=("path to the site.zcml configuration file"
-        " (more accurate but slow password managers registry creation)"))
+                 help=("path to the site.zcml configuration file"
+                       " (more accurate but slow password managers registry creation)"))
     p.add_option("-o", "--output", dest="destination", metavar="FILE",
-        help=("the file in which the output will be saved"
-        " (STDOUT by default)"))
+                 help=("the file in which the output will be saved"
+                       " (STDOUT by default)"))
     options, args = p.parse_args(argv[1:])
     options.managers = get_password_managers(options.config)
     options.program = prog

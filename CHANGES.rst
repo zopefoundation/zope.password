@@ -12,6 +12,8 @@
 
 - Drop support for Python 3.3.
 
+- Fix the ``zpasswd`` console script on Python 3.
+
 4.2.0 (2016-07-07)
 ==================
 

@@ -20,22 +20,17 @@ from codecs import getencoder
 try:
     from crypt import crypt
     from random import choice
-except ImportError:
+except ImportError: # pragma: no cover
     # The crypt module is not universally available, apparently
     crypt = None
 
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
+from zope.password.compat import text_type
 
 _encoder = getencoder("utf-8")
 
 PY2 = sys.version_info[0] == 2
-
-try:
-    unicode
-except NameError:
-    # Py3: Define unicode.
-    unicode = str
 
 
 if crypt is not None:
@@ -156,6 +151,10 @@ class MySQLPasswordManager(object):
     {MYSQL}0ecd752c5097d395
     >>> manager.match(encoded)
     True
+    >>> manager.match(encoded.decode())
+    True
+    >>> manager.checkPassword(encoded.decode(), password)
+    True
     >>> manager.checkPassword(encoded, password)
     True
     >>> manager.checkPassword(encoded, password + u"wrong")
@@ -165,7 +164,7 @@ class MySQLPasswordManager(object):
     hash ``379693e271cd3bd6``, according to
     http://phpsec.org/articles/2005/password-hashing.html
 
-    Our password manager generates the same value when seeded with the, so we
+    Our password manager generates the same value when seeded with the same seed, so we
     can be sure, our output is compatible with MySQL versions before 4.1:
 
     >>> password = 'PHP & Information Security'
@@ -186,6 +185,14 @@ class MySQLPasswordManager(object):
     >>> manager.match('{MD5}someotherhash')
     False
 
+    Spaces and tabs are ignored:
+
+    >>> encoded = manager.encodePassword('\tign or ed')
+    >>> print(encoded.decode())
+    {MYSQL}75818366052c6a78
+    >>> encoded = manager.encodePassword('ignored')
+    >>> print(encoded.decode())
+    {MYSQL}75818366052c6a78
     """
 
 
@@ -198,7 +205,7 @@ class MySQLPasswordManager(object):
                 # In Python 2 bytes iterate over single-char strings.
                 i = ord(i)
             if i == ord(b' ') or i == ord(b'\t'):
-                continue
+                continue # pragma: no cover (this is actually hit, but coverage isn't reporting it)
             nr ^= (((nr & 63) + add) * i) + (nr << 8)
             nr2 += (nr2 << 8) ^ nr
             add += i
@@ -207,11 +214,11 @@ class MySQLPasswordManager(object):
         return ("{MYSQL}%08lx%08lx" % (r0, r1)).encode()
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password == self.encodePassword(password)
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, unicode):
+        if isinstance(encoded_password, text_type):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{MYSQL}')
