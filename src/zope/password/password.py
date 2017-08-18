@@ -29,7 +29,6 @@ except ImportError: # pragma: no cover
     bcrypt = None
 
 from zope.interface import implementer
-from zope.password.compat import text_type
 from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
@@ -68,7 +67,7 @@ class PlainTextPasswordManager(object):
 
 
     def encodePassword(self, password):
-        if isinstance(password, text_type):
+        if not isinstance(password, bytes):
             password = password.encode('utf-8')
         return password
 
@@ -183,7 +182,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
-        elif isinstance(salt, text_type):
+        elif not isinstance(salt, bytes):
             salt = salt.encode('utf-8')
         hash = sha1(_encoder(password)[0])
         hash.update(salt)
@@ -193,7 +192,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         # standard_b64decode() cannot handle unicode input string. We
         # encode to ascii. This is safe as the encoded_password string
         # should not contain non-ascii characters anyway.
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         encoded_password = encoded_password[6:]
         if b'_' in encoded_password or b'-' in encoded_password:
@@ -206,7 +205,7 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password, salt)[6:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{SSHA}')
 
@@ -299,21 +298,21 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
-        elif isinstance(salt, text_type):
+        elif not isinstance(salt, bytes):
             salt = salt.encode('utf-8')
         hash = md5(_encoder(password)[0])
         hash.update(salt)
         return b'{SMD5}' + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[16:]
         return encoded_password == self.encodePassword(password, salt)
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{SMD5}')
 
@@ -384,7 +383,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
             md5(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         encoded = encoded_password[encoded_password.find(b'}') + 1:]
         if len(encoded) > 24:
@@ -393,7 +392,7 @@ class MD5PasswordManager(PlainTextPasswordManager):
         return encoded == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{MD5}')
 
@@ -478,7 +477,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
             sha1(_encoder(password)[0]).digest())
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         if self.match(encoded_password):
             encoded = encoded_password[encoded_password.find(b'}') + 1:]
@@ -491,7 +490,7 @@ class SHA1PasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return (
             encoded_password.startswith(b'{SHA}') or
@@ -499,12 +498,19 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
 
 class BCRYPTPasswordManager(PlainTextPasswordManager):
-    """BCRYPT password manager."""
+    """
+    BCRYPT password manager.
+
+    .. note:: This uses the :mod:`bcrypt` library in its
+        implementation, which `only uses the first 72 characters
+        <https://pypi.python.org/pypi/bcrypt/3.1.3#maximum-password-length>`_
+        of the password when computing the hash.
+    """
 
     _prefix = b'{BCRYPT}'
 
     def _to_bytes(self, password, encoding):
-        if isinstance(password, text_type):
+        if not isinstance(password, bytes):
             return password.encode(encoding)
         return password
 
@@ -515,17 +521,15 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         return self._to_bytes(hashed_password, 'ascii')
 
     def checkPassword(self, hashed_password, clear_password):
-        """Check a `hashed_password` against a `clear password`.
+        """Check a *hashed_password* against a *clear_password*.
 
         >>> from zope.password.password import BCRYPTPasswordManager
         >>> manager = BCRYPTPasswordManager()
         >>> manager.checkPassword(b'not from here', None)
         False
 
-        :param hashed_password: The encoded password.
-        :type hashed_password: str
-        :param clear_password: The password to check.
-        :type clear_password: unicode
+        :param bytes hashed_password: The encoded password.
+        :param unicode clear_password: The password to check.
         :returns: True iif hashed passwords are equal.
         :rtype: bool
         """
@@ -561,8 +565,7 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     def match(self, hashed_password):
         """Was the password hashed with this password manager?
 
-        :param hashed_password: The encoded password.
-        :type hashed_password: str
+        :param bytes hashed_password: The encoded password.
         :rtype: bool
         :returns: True iif the password was hashed with this manager.
         """

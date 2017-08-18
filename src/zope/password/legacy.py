@@ -26,7 +26,6 @@ except ImportError: # pragma: no cover
 
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
-from zope.password.compat import text_type
 
 _encoder = getencoder("utf-8")
 
@@ -214,11 +213,11 @@ class MySQLPasswordManager(object):
         return ("{MYSQL}%08lx%08lx" % (r0, r1)).encode()
 
     def checkPassword(self, encoded_password, password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password == self.encodePassword(password)
 
     def match(self, encoded_password):
-        if isinstance(encoded_password, text_type):
+        if not isinstance(encoded_password, bytes):
             encoded_password = encoded_password.encode('ascii')
         return encoded_password.startswith(b'{MYSQL}')
