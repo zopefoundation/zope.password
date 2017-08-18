@@ -29,7 +29,7 @@ from zope.password.vocabulary import PasswordManagerNamesVocabulary
 
 try:
     from zope.password.legacy import CryptPasswordManager
-except ImportError:
+except ImportError: # pragma: no cover
     CryptPasswordManager = None
 
 

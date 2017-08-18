@@ -35,6 +35,19 @@ def alltests():
     suites = list(zope.testrunner.find.find_suites(options))
     return unittest.TestSuite(suites)
 
+VOCABULARY_REQUIRES = [
+    'zope.schema',
+]
+
+BCRYPT_REQUIRES = [
+    'bcrypt',
+]
+
+TESTS_REQUIRE = VOCABULARY_REQUIRES + BCRYPT_REQUIRES + [
+    'zope.testing',
+    'zope.testrunner',
+]
+
 setup(name='zope.password',
       version='4.3.0.dev0',
       author='Zope Foundation and Contributors',
@@ -44,10 +57,10 @@ setup(name='zope.password',
           read('README.rst')
           + '\n\n' +
           read('CHANGES.rst')
-          ),
-      url='http://pypi.python.org/pypi/zope.password',
+      ),
+      url='http://github.com/zopefoundation/zope.password',
       license='ZPL 2.1',
-      classifiers = [
+      classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
@@ -56,33 +69,36 @@ setup(name='zope.password',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
           'Operating System :: OS Independent',
           'Topic :: Internet :: WWW/HTTP',
-          'Framework :: Zope3'],
+          'Framework :: Zope3',
+      ],
       keywords='zope authentication password zpasswd',
       packages=find_packages('src'),
       package_dir={'': 'src'},
-      extras_require=dict(vocabulary=['zope.schema'],
-                          test=['zope.schema', 'zope.testing'],
-                          bcrypt=['bcrypt'],
-                          ),
+      extras_require={
+          'vocabulary': VOCABULARY_REQUIRES,
+          'test': TESTS_REQUIRE,
+          'bcrypt': BCRYPT_REQUIRES,
+          'docs': [
+              'Sphinx',
+              'repoze.sphinx.autointerface',
+          ]
+      },
       namespace_packages=['zope'],
-      install_requires=['setuptools',
-                        'zope.component',
-                        'zope.configuration',
-                        'zope.interface',
-                        ],
-      tests_require=[
-          'zope.schema',
-          'zope.testing',
-          'zope.testrunner',
-          ],
+      install_requires=[
+          'setuptools',
+          'zope.component',
+          'zope.configuration',
+          'zope.interface',
+      ],
+      tests_require=TESTS_REQUIRE,
       test_suite='__main__.alltests',
       include_package_data=True,
       zip_safe=False,
@@ -90,4 +106,4 @@ setup(name='zope.password',
       [console_scripts]
       zpasswd = zope.password.zpasswd:main
       """,
-      )
+)

@@ -1,8 +1,9 @@
-:mod:`zope.password` API
-========================
+==========================
+ :mod:`zope.password` API
+==========================
 
 Interfaces
-----------
+==========
 
 .. automodule:: zope.password.interfaces
    :members:
@@ -10,7 +11,7 @@ Interfaces
 
 
 Password Manager Implementations
---------------------------------
+================================
 
 .. automodule:: zope.password.password
    :members:
@@ -18,7 +19,7 @@ Password Manager Implementations
 
 
 Deprecated Implementations
-##########################
+--------------------------
 
 .. warning::
 
@@ -33,7 +34,7 @@ Deprecated Implementations
 
 
 Vocabulary
-----------
+==========
 
 .. automodule:: zope.password.vocabulary
    :members:

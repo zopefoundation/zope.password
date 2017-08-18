@@ -16,32 +16,15 @@
 """
 import contextlib
 import doctest
-import re
 import unittest
 
-try:
-    import bcrypt
-except ImportError:
-    bcrypt = None
+import bcrypt
 
 from zope.interface.verify import verifyObject
-from zope.testing import renormalizing
 
 from zope.password.interfaces import IMatchingPasswordManager
-from zope.password.compat import bytes_type, text_type
 
-checker = renormalizing.RENormalizing([
-    # Python 3 bytes add a "b".
-    (re.compile("b('.*?')"),
-     r"\1"),
-    (re.compile('b(".*?")'),
-     r"\1"),
-    ])
-
-
-skip_if_bcrypt_not_installed = unittest.skipIf(
-    bcrypt is None,
-    'bcrypt is not installed')
+text_type = str if bytes is not str else unicode
 
 
 class TestBCRYPTPasswordManager(unittest.TestCase):
@@ -63,14 +46,12 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         yield (enc_pw1, enc_pw2)
         for enc_pw in (enc_pw1, enc_pw2):
             self.assertTrue(enc_pw.startswith(b'{BCRYPT}'))
-            self.assertTrue(isinstance(enc_pw, bytes_type))
+            self.assertTrue(isinstance(enc_pw, bytes))
 
-    @skip_if_bcrypt_not_installed
     def test_interface_compliance(self):
         pw_mgr = self._make_one()
         verifyObject(IMatchingPasswordManager, pw_mgr)
 
-    @skip_if_bcrypt_not_installed
     def test_encodePassword_with_no_salt(self):
         pw_mgr = self._make_one()
         with self._encode_twice(pw_mgr,
@@ -78,7 +59,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
                                 salt2=None) as encoded_passwords:
             self.assertNotEqual(*encoded_passwords)
 
-    @skip_if_bcrypt_not_installed
     def test_encodePassword_with_same_salt(self):
         pw_mgr = self._make_one()
         salt = bcrypt.gensalt()
@@ -87,7 +67,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
                                 salt2=salt) as encoded_passwords:
             self.assertEqual(*encoded_passwords)
 
-    @skip_if_bcrypt_not_installed
     def test_encodePassword_with_different_salts(self):
         pw_mgr = self._make_one()
         salt = bcrypt.gensalt()
@@ -100,7 +79,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
                                 salt2=salt) as encoded_passwords:
             self.assertNotEqual(*encoded_passwords)
 
-    @skip_if_bcrypt_not_installed
     def test_encodePassword_with_unicode_salts(self):
         pw_mgr = self._make_one()
         salt = bcrypt.gensalt()
@@ -110,7 +88,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
                                 salt2=salt) as encoded_passwords:
             self.assertEqual(*encoded_passwords)
 
-    @skip_if_bcrypt_not_installed
     def test_checkPassword(self):
         encoded = (
             b'{BCRYPT}'
@@ -135,7 +112,6 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         self.assertTrue(pw_mgr.checkPassword(encoded, password))
         self.assertTrue(pw_mgr.checkPassword(encoded2, password))
 
-    @skip_if_bcrypt_not_installed
     def test_match(self):
         pw_mgr = self._make_one()
         self.assertFalse(pw_mgr.match(b'{SHA1}1lksd;kf;slkf;slkf'))
@@ -144,11 +120,11 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
 
 def test_suite():
     suite = unittest.TestSuite((
-        doctest.DocTestSuite('zope.password.password', checker=checker),
-        doctest.DocTestSuite('zope.password.legacy', checker=checker),
+        doctest.DocTestSuite('zope.password.password'),
+        doctest.DocTestSuite('zope.password.legacy'),
         doctest.DocTestSuite(
             'zope.password.testing',
-            optionflags=doctest.ELLIPSIS, checker=checker),
+            optionflags=doctest.ELLIPSIS),
         ))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite
