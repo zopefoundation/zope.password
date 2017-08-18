@@ -5,8 +5,13 @@
 4.3.0 (unreleased)
 ==================
 
-- Added a ``bcrypt``-based password manager (available only if the ``bcrypt``
-  library is importable).
+- Added a ``bcrypt``-based password manager (available only if the
+  `bcrypt <https://pypi.python.org/pypi/bcrypt>`_ library is
+  importable). This manager can also check passwords that were encoded
+  with `z3c.bcrypt <https://pypi.python.org/pypi/z3c.bcrypt>`_. If
+  that package is *not* installed, then ``configure.zcml`` will
+  install this manager as a utility with both the ``BCRYPT``
+  (preferred) and ``bcrypt`` names for compatibility with it.
 
 - Add support for Python 3.6.
 
