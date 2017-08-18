@@ -14,7 +14,7 @@
 """Implementation of the zpasswd script.
 """
 from __future__ import print_function
-import optparse
+import argparse
 import os
 import sys
 from xml.sax.saxutils import quoteattr
@@ -156,7 +156,7 @@ class Application(object):
     def process(self):
         options = self.options
 
-        destination = sys.stdout if not options.destination else open(options.destination, 'w')
+        destination = options.destination
         try:
             principal = self.get_principal()
 
@@ -269,20 +269,18 @@ def get_password_managers(config_path=None):
 
 def parse_args(argv):
     """Parse the command line, returning an object representing the input."""
-    _path, prog = os.path.split(os.path.realpath(argv[0]))
-    p = optparse.OptionParser(prog=prog,
-                              usage="%prog [options]",
-                              version=VERSION)
-    p.add_option("-c", "--config", dest="config", metavar="FILE",
-                 help=("path to the site.zcml configuration file"
-                       " (more accurate but slow password managers registry creation)"))
-    p.add_option("-o", "--output", dest="destination", metavar="FILE",
-                 help=("the file in which the output will be saved"
-                       " (STDOUT by default)"))
-    options, args = p.parse_args(argv[1:])
+    prog = os.path.split(os.path.realpath(argv[0]))[1]
+    p = argparse.ArgumentParser(prog=prog)
+    p.add_argument("-c", "--config", dest="config", metavar="FILE",
+                   help=("path to the site.zcml configuration file"
+                         " (more accurate but slow password managers registry creation)"))
+    p.add_argument("-o", "--output", dest="destination", metavar="FILE",
+                   help=("the file in which the output will be saved"
+                         " (STDOUT by default)"),
+                   default=sys.stdout,
+                   type=argparse.FileType('w'))
+    p.add_argument("--version", action="version", version=VERSION)
+    options = p.parse_args(argv[1:])
     options.managers = get_password_managers(options.config)
     options.program = prog
-    options.version = VERSION
-    if args:
-        p.error("too many arguments")
     return options
