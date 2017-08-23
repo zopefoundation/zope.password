@@ -3,6 +3,8 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     >
 
+  <include package="zope.component" file="meta.zcml" />
+
   <utility
       name="Plain Text"
       provides=".interfaces.IMatchingPasswordManager"
@@ -42,6 +44,16 @@
   <configure zcml:condition="installed bcrypt">
     <utility
        name="BCRYPT"
+       provides=".interfaces.IMatchingPasswordManager"
+       factory=".password.BCRYPTPasswordManager"
+       />
+    <!--
+    Also install it under the same name as z3c.bcrypt does
+    for compatibility with that library.
+    -->
+    <utility
+       zcml:condition="not-installed z3c.bcrypt"
+       name="bcrypt"
        provides=".interfaces.IMatchingPasswordManager"
        factory=".password.BCRYPTPasswordManager"
        />

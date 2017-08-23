@@ -23,6 +23,8 @@ from codecs import getencoder
 from hashlib import md5, sha1
 from os import urandom
 
+import re
+
 try:
     import bcrypt
 except ImportError: # pragma: no cover
@@ -501,6 +503,10 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     """
     BCRYPT password manager.
 
+    In addition to the passwords encoded by this class,
+    this class can also recognize passwords encoded by :mod:`z3c.bcrypt`
+    and properly match and check them.
+
     .. note:: This uses the :mod:`bcrypt` library in its
         implementation, which `only uses the first 72 characters
         <https://pypi.python.org/pypi/bcrypt/3.1.3#maximum-password-length>`_
@@ -508,6 +514,10 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     """
 
     _prefix = b'{BCRYPT}'
+    # This is the same regex that z3c.bcrypt uses, via way of cryptacular
+    # The $2a$ is a prefix.
+    _z3c_bcrypt_syntax = re.compile(br'\$2a\$[0-9]{2}\$[./A-Za-z0-9]{53}')
+
 
     def _to_bytes(self, password, encoding):
         if not isinstance(password, bytes):
@@ -536,7 +546,10 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         if not self.match(hashed_password):
             return False
         pw_bytes = self._clean_clear(clear_password)
-        pw_hash = hashed_password[len(self._prefix):]
+        pw_hash = hashed_password
+        if hashed_password.startswith(self._prefix):
+            pw_hash = hashed_password[len(self._prefix):]
+
         try:
             ok = bcrypt.checkpw(pw_bytes, pw_hash)
         except ValueError: # pragma: no cover
@@ -569,7 +582,8 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         :rtype: bool
         :returns: True iif the password was hashed with this manager.
         """
-        return hashed_password.startswith(self._prefix)
+        return (hashed_password.startswith(self._prefix)
+                or self._z3c_bcrypt_syntax.match(hashed_password) is not None)
 
 
 # Simple registry

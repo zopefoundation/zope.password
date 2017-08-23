@@ -41,7 +41,10 @@ class TestBase(unittest.TestCase):
                                          suffix=".zcml",
                                          delete=False) as f:
             f.write(
-                b'<configure xmlns="http://namespaces.zope.org/zope"/>\n')
+                b"""<configure xmlns="http://namespaces.zope.org/zope">
+                  <include file="configure.zcml" package="zope.password" />
+                </configure>
+                """)
             self.config = f.name
             self.addCleanup(os.remove, f.name)
 

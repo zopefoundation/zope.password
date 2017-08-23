@@ -20,6 +20,7 @@ import unittest
 
 import bcrypt
 
+from zope.component.testing import PlacelessSetup
 from zope.interface.verify import verifyObject
 
 from zope.password.interfaces import IMatchingPasswordManager
@@ -118,13 +119,58 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         self.assertTrue(pw_mgr.match(b'{BCRYPT}'))
 
 
+class TestZ3cBcryptCompatible(unittest.TestCase):
+
+    password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    z3c_encoded = b'$2a$10$dzfwtSW1sFx5Q.9/8.3dzOyvIBz6xu4Y00kJWZpOrQ1eH4amFtHP6'
+
+
+    def _make_one(self):
+        from zope.password.password import BCRYPTPasswordManager
+        return BCRYPTPasswordManager()
+
+    def test_checkPassword(self):
+        pw_mgr = self._make_one()
+        self.assertTrue(pw_mgr.checkPassword(self.z3c_encoded, self.password))
+        # Mess with the hashed password, should not match
+        encoded = self.z3c_encoded[:-1]
+        self.assertFalse(pw_mgr.checkPassword(encoded, self.password))
+
+    def test_match(self):
+        pw_mgr = self._make_one()
+        self.assertTrue(pw_mgr.match(self.z3c_encoded))
+
+
+class TestConfiguration(PlacelessSetup,
+                        unittest.TestCase):
+
+    def setUp(self):
+        from zope.configuration import xmlconfig
+        import zope.password
+        xmlconfig.file('configure.zcml', zope.password)
+
+    def test_crypt_utility_names(self):
+        from zope.password.password import BCRYPTPasswordManager
+        from zope.password.interfaces import IPasswordManager
+        from zope import component
+
+        self.assertIsInstance(component.getUtility(IPasswordManager, 'BCRYPT'),
+                              BCRYPTPasswordManager)
+        self.assertIsInstance(component.getUtility(IPasswordManager, 'bcrypt'),
+                              BCRYPTPasswordManager)
+
+
+
 def test_suite():
+    from zope.component.testing import setUp, tearDown
     suite = unittest.TestSuite((
         doctest.DocTestSuite('zope.password.password'),
         doctest.DocTestSuite('zope.password.legacy'),
         doctest.DocTestSuite(
             'zope.password.testing',
-            optionflags=doctest.ELLIPSIS),
-        ))
+            optionflags=doctest.ELLIPSIS,
+            setUp=setUp,
+            tearDown=tearDown),
+    ))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite
