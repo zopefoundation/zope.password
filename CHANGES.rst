@@ -14,6 +14,8 @@
 
 - Fix the ``zpasswd`` console script on Python 3.
 
+- Update the ``zpasswd`` script to use ``argparse`` instead of ``optparse.``
+
 4.2.0 (2016-07-07)
 ==================
 

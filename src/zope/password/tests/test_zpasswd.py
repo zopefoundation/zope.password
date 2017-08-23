@@ -17,6 +17,7 @@ import contextlib
 import doctest
 import os
 import sys
+import tempfile
 import unittest
 
 import io
@@ -36,13 +37,13 @@ class TestBase(unittest.TestCase):
 
     def setUp(self):
         # Create a minimal site.zcml file
-        with open('testsite.zcml', 'wb') as file:
-            file.write(
+        with tempfile.NamedTemporaryFile(prefix="testsite",
+                                         suffix=".zcml",
+                                         delete=False) as f:
+            f.write(
                 b'<configure xmlns="http://namespaces.zope.org/zope"/>\n')
-
-    def tearDown(self):
-        # Clean up
-        os.unlink('testsite.zcml')
+            self.config = f.name
+            self.addCleanup(os.remove, f.name)
 
     @contextlib.contextmanager
     def patched_stdio(self, input_data=None):
@@ -81,32 +82,36 @@ class TestBase(unittest.TestCase):
 
 class ArgumentParsingTestCase(TestBase):
 
-    config = "testsite.zcml"
-
     def parse_args(self, args):
         argv = ["foo/bar.py"] + args
         with self.patched_stdio():
             options = zpasswd.parse_args(argv)
+
         self.assertEqual(options.program, "bar.py")
-        self.assertTrue(options.version)
         return options
 
-    def check_stdout_content(self, args):
+    def check_stdout_content(self, args, stderr=False):
         with self.assertRaises(SystemExit) as e:
             self.parse_args(args)
 
         e = e.exception
         self.assertEqual(e.code, 0)
-        self.assertTrue(self.stdout.getvalue())
-        self.assertFalse(self.stderr.getvalue())
+        full = self.stdout
+        empty = self.stderr
+        if stderr:
+            full = self.stderr
+            empty = self.stdout
+        self.assertTrue(full.getvalue())
+        self.assertFalse(empty.getvalue())
 
     def test_no_arguments(self):
         options = self.parse_args([])
         self.assertTrue(options.managers)
-        self.assertFalse(options.destination)
+        self.assertIs(options.destination, self.stdout)
 
     def test_version_long(self):
-        self.check_stdout_content(["--version"])
+        self.check_stdout_content(["--version"],
+                                  stderr=sys.version_info[0] == 2)
 
     def test_help_long(self):
         self.check_stdout_content(["--help"])
@@ -114,13 +119,15 @@ class ArgumentParsingTestCase(TestBase):
     def test_help_short(self):
         self.check_stdout_content(["-h"])
 
-    def test_destination_short(self):
-        options = self.parse_args(["-o", "filename"])
-        self.assertEqual(options.destination, "filename")
+    def test_destination_short(self, option="-o"):
+        handle, path = tempfile.mkstemp()
+        os.close(handle)
+        self.addCleanup(os.remove, path)
+        options = self.parse_args([option, path])
+        self.assertEqual(options.destination.name, path)
 
     def test_destination_long(self):
-        options = self.parse_args(["--output", "filename"])
-        self.assertEqual(options.destination, "filename")
+        self.test_destination_short("--output")
 
     def test_config_short(self):
         options = self.parse_args(["-c", self.config])
@@ -134,7 +141,7 @@ class ArgumentParsingTestCase(TestBase):
         with self.assertRaises(SystemExit):
             self.parse_args(["--config", self.config, "extra stuff"])
 
-        self.assertIn("too many arguments",
+        self.assertIn("unrecognized arguments",
                       self.stderr.getvalue())
 
     def test_main(self):
@@ -163,10 +170,11 @@ class ControlledInputApplication(zpasswd.Application):
 class Options(object):
 
     config = None
-    destination = None
-    version = "[test-version]"
     program = "[test-program]"
     managers = password.managers
+
+    def __init__(self):
+        self.destination = sys.stdout
 
 class InputCollectionTestCase(TestBase):
 
@@ -185,7 +193,6 @@ class InputCollectionTestCase(TestBase):
             self.assertEqual(line.strip(), expline)
 
     def test_principal_information(self):
-        options = self.createOptions()
         apps = []
         def factory(options):
             app = ControlledInputApplication(
@@ -195,6 +202,7 @@ class InputCollectionTestCase(TestBase):
             apps.append(app)
             return app
         with self.patched_stdio():
+            options = self.createOptions()
             zpasswd.run_app_with_options(options, factory)
         self.assertFalse(self.stderr.getvalue())
         self.assertTrue(apps[0].all_input_consumed())
@@ -214,16 +222,16 @@ class TestDestination(InputCollectionTestCase):
     destination = None
 
     def createOptions(self):
-        import tempfile
         opts = Options()
-        handle, destination = tempfile.mkstemp('.test_zpasswd')
-        self.addCleanup(lambda: os.remove(destination))
-        os.close(handle)
+        destination = tempfile.NamedTemporaryFile(mode='w',
+                                                  suffix=".test_zpasswd",
+                                                  delete=False)
+        self.addCleanup(os.remove, destination.name)
         self.destination = opts.destination = destination
         return opts
 
     def _get_output(self):
-        with open(self.destination) as f:
+        with open(self.destination.name) as f:
             return f.read()
 
 
