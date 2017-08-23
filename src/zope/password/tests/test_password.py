@@ -162,12 +162,15 @@ class TestConfiguration(PlacelessSetup,
 
 
 def test_suite():
+    from zope.component.testing import setUp, tearDown
     suite = unittest.TestSuite((
         doctest.DocTestSuite('zope.password.password'),
         doctest.DocTestSuite('zope.password.legacy'),
         doctest.DocTestSuite(
             'zope.password.testing',
-            optionflags=doctest.ELLIPSIS),
-        ))
+            optionflags=doctest.ELLIPSIS,
+            setUp=setUp,
+            tearDown=tearDown),
+    ))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite

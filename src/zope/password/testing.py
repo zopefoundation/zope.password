@@ -15,28 +15,15 @@
 """
 __docformat__ = "reStructuredText"
 
-from zope.component import provideUtility
-from zope.schema.interfaces import IVocabularyFactory
-
-from zope.password.interfaces import IMatchingPasswordManager
-from zope.password.password import PlainTextPasswordManager
-from zope.password.password import MD5PasswordManager
-from zope.password.password import SMD5PasswordManager
-from zope.password.password import SHA1PasswordManager
-from zope.password.password import SSHAPasswordManager
-from zope.password.legacy import MySQLPasswordManager
-from zope.password.vocabulary import PasswordManagerNamesVocabulary
-
-try:
-    from zope.password.legacy import CryptPasswordManager
-except ImportError: # pragma: no cover
-    CryptPasswordManager = None
-
+import zope.password
+from zope.configuration import xmlconfig
 
 def setUpPasswordManagers():
     """Helper function for setting up password manager utilities for tests
 
     >>> from zope.component import getUtility
+    >>> from zope.password.interfaces import IMatchingPasswordManager
+    >>> from zope.schema.interfaces import IVocabularyFactory
     >>> setUpPasswordManagers()
 
     >>> getUtility(IMatchingPasswordManager, 'Plain Text')
@@ -58,8 +45,8 @@ def setUpPasswordManagers():
     ...     CryptPasswordManager = None
     ...     True
     ... else:
-    ...     from zope.password.legacy import CryptPasswordManager as cpm
-    ...     getUtility(IMatchingPasswordManager, 'Crypt') is cpm
+    ...     from zope.password.legacy import CryptPasswordManager
+    ...     getUtility(IMatchingPasswordManager, 'Crypt') is not None
     True
 
     >>> voc = getUtility(IVocabularyFactory, 'Password Manager Names')
@@ -83,16 +70,4 @@ def setUpPasswordManagers():
     True
 
     """
-    provideUtility(PlainTextPasswordManager(), IMatchingPasswordManager,
-                   'Plain Text')
-    provideUtility(SSHAPasswordManager(), IMatchingPasswordManager, 'SSHA')
-    provideUtility(MD5PasswordManager(), IMatchingPasswordManager, 'MD5')
-    provideUtility(SMD5PasswordManager(), IMatchingPasswordManager, 'SMD5')
-    provideUtility(SHA1PasswordManager(), IMatchingPasswordManager, 'SHA1')
-    provideUtility(MySQLPasswordManager(), IMatchingPasswordManager, 'MySQL')
-
-    if CryptPasswordManager is not None:
-        provideUtility(CryptPasswordManager, IMatchingPasswordManager, 'Crypt')
-
-    provideUtility(PasswordManagerNamesVocabulary,
-                   IVocabularyFactory, 'Password Manager Names')
+    xmlconfig.file('configure.zcml', zope.password)
