@@ -57,6 +57,11 @@
        provides=".interfaces.IMatchingPasswordManager"
        factory=".password.BCRYPTPasswordManager"
        />
+    <utility
+       name="BCRYPTKDF"
+       provides=".interfaces.IMatchingPasswordManager"
+       factory=".password.BCRYPTKDFPasswordManager"
+       />
   </configure>
 
   <configure zcml:condition="installed crypt">

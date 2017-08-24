@@ -11,7 +11,11 @@
   with `z3c.bcrypt <https://pypi.python.org/pypi/z3c.bcrypt>`_. If
   that package is *not* installed, then ``configure.zcml`` will
   install this manager as a utility with both the ``BCRYPT``
-  (preferred) and ``bcrypt`` names for compatibility with it.
+  (preferred) and ``bcrypt`` names for compatibility with it. (See
+  https://github.com/zopefoundation/zope.password/issues/10)
+
+- Add a ``bcrypt_kdf`` password manager. This allows tunable numbers
+  of rounds. See https://github.com/zopefoundation/zope.password/issues/9
 
 - Add support for Python 3.6.
 

@@ -18,6 +18,7 @@ __docformat__ = 'restructuredtext'
 from base64 import standard_b64decode
 from base64 import standard_b64encode
 from base64 import urlsafe_b64decode
+from base64 import urlsafe_b64encode
 from binascii import a2b_hex
 from codecs import getencoder
 from hashlib import md5, sha1
@@ -33,7 +34,12 @@ except ImportError: # pragma: no cover
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
 
-_encoder = getencoder("utf-8")
+_enc = getencoder("utf-8")
+
+def _encoder(s):
+    if isinstance(s, bytes):
+        return s
+    return _enc(s)[0]
 
 
 @implementer(IMatchingPasswordManager)
@@ -69,8 +75,7 @@ class PlainTextPasswordManager(object):
 
 
     def encodePassword(self, password):
-        if not isinstance(password, bytes):
-            password = password.encode('utf-8')
+        password = _encoder(password)
         return password
 
     def checkPassword(self, encoded_password, password):
@@ -84,8 +89,15 @@ class PlainTextPasswordManager(object):
         # SSHA hash.
         return False
 
+class _PrefixedPasswordManager(PlainTextPasswordManager):
 
-class SSHAPasswordManager(PlainTextPasswordManager):
+    # The bytes prefix this object uses.
+    _prefix = None
+
+    def match(self, encoded_password):
+        return _encoder(encoded_password).startswith(self._prefix)
+
+class SSHAPasswordManager(_PrefixedPasswordManager):
     """SSHA password manager.
 
     SSHA is basically SHA1-encoding which also incorporates a salt
@@ -181,21 +193,20 @@ class SSHAPasswordManager(PlainTextPasswordManager):
 
     """
 
+    _prefix = b'{SSHA}'
+
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
         elif not isinstance(salt, bytes):
-            salt = salt.encode('utf-8')
-        hash = sha1(_encoder(password)[0])
+            salt = _encoder(salt)
+        hash = sha1(_encoder(password))
         hash.update(salt)
-        return b'{SSHA}' + standard_b64encode(hash.digest() + salt)
+        return self._prefix + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        # standard_b64decode() cannot handle unicode input string. We
-        # encode to ascii. This is safe as the encoded_password string
-        # should not contain non-ascii characters anyway.
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
+        # standard_b64decode() cannot handle unicode input string.
+        encoded_password = _encoder(encoded_password)
         encoded_password = encoded_password[6:]
         if b'_' in encoded_password or b'-' in encoded_password:
             # Encoded using old urlsafe_b64encode, re-encode
@@ -206,13 +217,8 @@ class SSHAPasswordManager(PlainTextPasswordManager):
         salt = byte_string[20:]
         return encoded_password == self.encodePassword(password, salt)[6:]
 
-    def match(self, encoded_password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
-        return encoded_password.startswith(b'{SSHA}')
 
-
-class SMD5PasswordManager(PlainTextPasswordManager):
+class SMD5PasswordManager(_PrefixedPasswordManager):
     """SMD5 password manager.
 
     SMD5 is basically SMD5-encoding which also incorporates a salt
@@ -297,29 +303,25 @@ class SMD5PasswordManager(PlainTextPasswordManager):
     False
     """
 
+    _prefix = b'{SMD5}'
+
     def encodePassword(self, password, salt=None):
         if salt is None:
             salt = urandom(4)
         elif not isinstance(salt, bytes):
             salt = salt.encode('utf-8')
-        hash = md5(_encoder(password)[0])
+        hash = md5(_encoder(password))
         hash.update(salt)
-        return b'{SMD5}' + standard_b64encode(hash.digest() + salt)
+        return self._prefix + standard_b64encode(hash.digest() + salt)
 
     def checkPassword(self, encoded_password, password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
+        encoded_password = _encoder(encoded_password)
         byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[16:]
         return encoded_password == self.encodePassword(password, salt)
 
-    def match(self, encoded_password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
-        return encoded_password.startswith(b'{SMD5}')
 
-
-class MD5PasswordManager(PlainTextPasswordManager):
+class MD5PasswordManager(_PrefixedPasswordManager):
     """MD5 password manager.
 
     >>> from zope.interface.verify import verifyObject
@@ -378,28 +380,24 @@ class MD5PasswordManager(PlainTextPasswordManager):
     False
     """
 
+    _prefix = b'{MD5}'
+
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return b'{MD5}' + standard_b64encode(
-            md5(_encoder(password)[0]).digest())
+        return self._prefix + standard_b64encode(
+            md5(_encoder(password)).digest())
 
     def checkPassword(self, encoded_password, password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
+        encoded_password = _encoder(encoded_password)
         encoded = encoded_password[encoded_password.find(b'}') + 1:]
         if len(encoded) > 24:
             # Backwards compatible, hexencoded md5 and bogus salt
             encoded = standard_b64encode(a2b_hex(encoded[-32:]))
         return encoded == self.encodePassword(password)[5:]
 
-    def match(self, encoded_password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
-        return encoded_password.startswith(b'{MD5}')
 
-
-class SHA1PasswordManager(PlainTextPasswordManager):
+class SHA1PasswordManager(_PrefixedPasswordManager):
     """SHA1 password manager.
 
     >>> from zope.interface.verify import verifyObject
@@ -472,15 +470,16 @@ class SHA1PasswordManager(PlainTextPasswordManager):
 
     """
 
+    _prefix = b'{SHA}'
+
     def encodePassword(self, password, salt=None):
         # The salt argument only exists for backwards compatibility and is
         # ignored on purpose.
-        return b'{SHA}' + standard_b64encode(
-            sha1(_encoder(password)[0]).digest())
+        return self._prefix + standard_b64encode(
+            sha1(_encoder(password)).digest())
 
     def checkPassword(self, encoded_password, password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
+        encoded_password = _encoder(encoded_password)
         if self.match(encoded_password):
             encoded = encoded_password[encoded_password.find(b'}') + 1:]
             if len(encoded) > 28:
@@ -492,14 +491,13 @@ class SHA1PasswordManager(PlainTextPasswordManager):
         return encoded_password == self.encodePassword(password)[5:]
 
     def match(self, encoded_password):
-        if not isinstance(encoded_password, bytes):
-            encoded_password = encoded_password.encode('ascii')
+        encoded_password = _encoder(encoded_password)
         return (
-            encoded_password.startswith(b'{SHA}') or
+            encoded_password.startswith(self._prefix) or
             encoded_password.startswith(b'{SHA1}'))
 
 
-class BCRYPTPasswordManager(PlainTextPasswordManager):
+class BCRYPTPasswordManager(_PrefixedPasswordManager):
     """
     BCRYPT password manager.
 
@@ -518,17 +516,8 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
     # The $2a$ is a prefix.
     _z3c_bcrypt_syntax = re.compile(br'\$2a\$[0-9]{2}\$[./A-Za-z0-9]{53}')
 
-
-    def _to_bytes(self, password, encoding):
-        if not isinstance(password, bytes):
-            return password.encode(encoding)
-        return password
-
-    def _clean_clear(self, password):
-        return self._to_bytes(password, 'utf-8')
-
-    def _clean_hashed(self, hashed_password):
-        return self._to_bytes(hashed_password, 'ascii')
+    _clean_clear = staticmethod(_encoder)
+    _clean_hashed = staticmethod(_encoder)
 
     def checkPassword(self, hashed_password, clear_password):
         """Check a *hashed_password* against a *clear_password*.
@@ -582,8 +571,104 @@ class BCRYPTPasswordManager(PlainTextPasswordManager):
         :rtype: bool
         :returns: True iif the password was hashed with this manager.
         """
+        hashed_password = _encoder(hashed_password)
         return (hashed_password.startswith(self._prefix)
                 or self._z3c_bcrypt_syntax.match(hashed_password) is not None)
+
+class BCRYPTKDFPasswordManager(_PrefixedPasswordManager):
+    """
+    BCRYPT KDF password manager.
+
+    This manager converts a plain text password into a byte array .
+    The password and salt values (randomly generated when the password
+    is encoded) are combined and repeatedly hashed *rounds* times. The
+    repeated hashing is designed to thwart discovery of the key via
+    password guessing attacks. The higher the number of rounds, the
+    slower each attempt will be.
+
+    Compared to the :class:`BCRYPTPasswordManager`, this has the
+    advantage of allowing tunable rounds, so as computing devices get
+    more powerful making brute force attacks faster, the difficulty
+    level can be raised (for newly encoded passwords).
+
+    >>> from zope.password.password import BCRYPTKDFPasswordManager
+    >>> manager = BCRYPTKDFPasswordManager()
+    >>> manager.checkPassword(b'not from here', None)
+    False
+
+    Let's encode a password. We'll use the minimum acceptable number
+    of rounds so that the tests run fast:
+
+    >>> manager.rounds = 51
+    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    >>> encoded = manager.encodePassword(password)
+    >>> print(encoded.decode())
+    {BCRYPTKDF}33...
+
+    It checks out:
+
+    >>> manager.checkPassword(encoded, password)
+    True
+
+    We can change the number of rounds for future encodings:
+
+    >>> manager.rounds = 100
+    >>> encoded2 = manager.encodePassword(password)
+    >>> print(encoded2.decode())
+    {BCRYPTKDF}64...
+    >>> manager.checkPassword(encoded2, password)
+    True
+
+    And the old password still checks out:
+
+    >>> manager.checkPassword(encoded, password)
+    True
+    """
+
+    #: The number of rounds of hashing that should be applied.
+    #: The higher the number, the slower it is. It should be at least
+    #: 50.
+    rounds = 1<<10
+
+    #: The number of bytes long the encoded password will be. It must be
+    #: at least 1 and no more than 512.
+    keylen = 32
+
+    _prefix = b'{BCRYPTKDF}'
+
+    def _encode(self, password, salt, rounds, keylen):
+        password = _encoder(password)
+
+        key = bcrypt.kdf(password, salt=salt,
+                         desired_key_bytes=keylen,
+                         rounds=rounds)
+        rounds_bytes = _encoder('%x' % rounds)
+        result = (self._prefix
+                  + rounds_bytes
+                  + b'$'
+                  + urlsafe_b64encode(salt)
+                  + b'$'
+                  + urlsafe_b64encode(key))
+        return result
+
+    def encodePassword(self, password):
+        salt = bcrypt.gensalt()
+        return self._encode(password, salt, self.rounds, self.keylen)
+
+    def checkPassword(self, hashed_password, clear_password):
+        hashed_password = _encoder(hashed_password)
+        if not self.match(hashed_password):
+            return False
+        rounds, salt, key = hashed_password[len(self._prefix):].split(b'$')
+        rounds = int(rounds, 16)
+
+        salt = urlsafe_b64decode(salt)
+        keylen = len(urlsafe_b64decode(key))
+        encoded_password = self._encode(clear_password, salt, rounds, keylen)
+        # XXX: Do we need to use a timing-safe comparison function here?
+        # z3c.bcrypt does, and so does bcrypt.hashpw. But there is no such
+        # public function
+        return hashed_password == encoded_password
 
 
 # Simple registry
@@ -597,3 +682,4 @@ managers = [
 
 if bcrypt is not None:
     managers.append(('BCRYPT', BCRYPTPasswordManager()))
+    managers.append(('BCRYPTKDF', BCRYPTKDFPasswordManager()))

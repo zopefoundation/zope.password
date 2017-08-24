@@ -26,6 +26,10 @@ def setUpPasswordManagers():
     >>> from zope.schema.interfaces import IVocabularyFactory
     >>> setUpPasswordManagers()
 
+    >>> getUtility(IMatchingPasswordManager, 'BCRYPT')
+    <zope.password.password.BCRYPTPasswordManager object at 0x...>
+    >>> getUtility(IMatchingPasswordManager, 'BCRYPTKDF')
+    <zope.password.password.BCRYPTKDFPasswordManager object at 0x...>
     >>> getUtility(IMatchingPasswordManager, 'Plain Text')
     <zope.password.password.PlainTextPasswordManager object at 0x...>
     >>> getUtility(IMatchingPasswordManager, 'SSHA')
@@ -64,6 +68,10 @@ def setUpPasswordManagers():
     >>> 'SMD5' in voc
     True
     >>> 'MySQL' in voc
+    True
+    >>> 'BCRYPT' in voc
+    True
+    >>> 'BCRYPTKDF' in voc
     True
 
     >>> CryptPasswordManager is None or 'Crypt' in voc
