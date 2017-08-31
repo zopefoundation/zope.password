@@ -51,15 +51,23 @@ eight implementations:
 :class:`zope.password.password.BCRYPTPasswordManager`
 
    A manager implementing the bcrypt hashing scheme. Only available if
-   the bcrypt_ module is installed.  This manager is considered the
-   most secure.
+   the bcrypt_ module is installed.  This manager is considered
+   one of the most secure.
+
+:class:`zope.password.password.BCRYPTKDFPasswordManager`
+
+   A manager implementing the bcrypt_kdf hashing scheme. Only available if
+   the bcrypt_ module is installed.  This manager is considered
+   one of the most secure.
+
 
 The ``Crypt``, ``MD5``, ``SMD5``, ``SHA`` and ``SSHA`` password managers
 are all compatible with RFC 2307 LDAP implementations of the same password
 encoding schemes.
 
 .. note::
-   It is strongly recommended to use the BCRYPTPasswordManager, as it's the
+   It is strongly recommended to use the BCRYPTPasswordManager or
+   BCRYPTKDFPasswordManager, as they are the
    most secure.
 
 The package also provides a script, :command:`zpasswd`, to generate

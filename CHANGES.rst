@@ -11,15 +11,24 @@
   with `z3c.bcrypt <https://pypi.python.org/pypi/z3c.bcrypt>`_. If
   that package is *not* installed, then ``configure.zcml`` will
   install this manager as a utility with both the ``BCRYPT``
-  (preferred) and ``bcrypt`` names for compatibility with it.
+  (preferred) and ``bcrypt`` names for compatibility with it. (See
+  https://github.com/zopefoundation/zope.password/issues/10)
 
-- Add support for Python 3.6.
-
-- Drop support for Python 3.3.
+- Add a ``bcrypt_kdf`` password manager. This allows tunable numbers
+  of rounds. See https://github.com/zopefoundation/zope.password/issues/9
 
 - Fix the ``zpasswd`` console script on Python 3.
 
 - Update the ``zpasswd`` script to use ``argparse`` instead of ``optparse.``
+
+- Use ``hmac.compare_digest`` when checking passwords to
+  prevent timing analysis. This requires Python 2.7.7 or above.
+
+- Add support for Python 3.6.
+
+- Drop support for Python 3.3 and Python 2.7.6 and below.
+
+- Drop support for ``python setup.py test``.
 
 4.2.0 (2016-07-07)
 ==================
