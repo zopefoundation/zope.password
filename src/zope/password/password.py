@@ -26,6 +26,8 @@ from os import urandom
 
 import re
 
+from hmac import compare_digest as _timing_safe_compare
+
 try:
     import bcrypt
 except ImportError: # pragma: no cover
@@ -215,7 +217,8 @@ class SSHAPasswordManager(_PrefixedPasswordManager):
         else:
             byte_string = standard_b64decode(encoded_password)
         salt = byte_string[20:]
-        return encoded_password == self.encodePassword(password, salt)[6:]
+        return _timing_safe_compare(encoded_password,
+                                    self.encodePassword(password, salt)[6:])
 
 
 class SMD5PasswordManager(_PrefixedPasswordManager):
@@ -318,7 +321,8 @@ class SMD5PasswordManager(_PrefixedPasswordManager):
         encoded_password = _encoder(encoded_password)
         byte_string = standard_b64decode(encoded_password[6:])
         salt = byte_string[16:]
-        return encoded_password == self.encodePassword(password, salt)
+        return _timing_safe_compare(encoded_password,
+                                    self.encodePassword(password, salt))
 
 
 class MD5PasswordManager(_PrefixedPasswordManager):
@@ -394,7 +398,7 @@ class MD5PasswordManager(_PrefixedPasswordManager):
         if len(encoded) > 24:
             # Backwards compatible, hexencoded md5 and bogus salt
             encoded = standard_b64encode(a2b_hex(encoded[-32:]))
-        return encoded == self.encodePassword(password)[5:]
+        return _timing_safe_compare(encoded, self.encodePassword(password)[5:])
 
 
 class SHA1PasswordManager(_PrefixedPasswordManager):
@@ -488,13 +492,11 @@ class SHA1PasswordManager(_PrefixedPasswordManager):
             return encoded == self.encodePassword(password)[5:]
         # Backwards compatible, hexdigest and no prefix
         encoded_password = standard_b64encode(a2b_hex(encoded_password[-40:]))
-        return encoded_password == self.encodePassword(password)[5:]
+        return _timing_safe_compare(encoded_password, self.encodePassword(password)[5:])
 
     def match(self, encoded_password):
         encoded_password = _encoder(encoded_password)
-        return (
-            encoded_password.startswith(self._prefix) or
-            encoded_password.startswith(b'{SHA1}'))
+        return encoded_password.startswith((self._prefix, b'{SHA1}'))
 
 
 class BCRYPTPasswordManager(_PrefixedPasswordManager):
@@ -579,7 +581,7 @@ class BCRYPTKDFPasswordManager(_PrefixedPasswordManager):
     """
     BCRYPT KDF password manager.
 
-    This manager converts a plain text password into a byte array .
+    This manager converts a plain text password into a byte array.
     The password and salt values (randomly generated when the password
     is encoded) are combined and repeatedly hashed *rounds* times. The
     repeated hashing is designed to thwart discovery of the key via
@@ -628,7 +630,7 @@ class BCRYPTKDFPasswordManager(_PrefixedPasswordManager):
     #: The number of rounds of hashing that should be applied.
     #: The higher the number, the slower it is. It should be at least
     #: 50.
-    rounds = 1<<10
+    rounds = 1024
 
     #: The number of bytes long the encoded password will be. It must be
     #: at least 1 and no more than 512.
@@ -665,10 +667,7 @@ class BCRYPTKDFPasswordManager(_PrefixedPasswordManager):
         salt = urlsafe_b64decode(salt)
         keylen = len(urlsafe_b64decode(key))
         encoded_password = self._encode(clear_password, salt, rounds, keylen)
-        # XXX: Do we need to use a timing-safe comparison function here?
-        # z3c.bcrypt does, and so does bcrypt.hashpw. But there is no such
-        # public function
-        return hashed_password == encoded_password
+        return _timing_safe_compare(hashed_password, encoded_password)
 
 
 # Simple registry
