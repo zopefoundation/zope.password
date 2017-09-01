@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.3.1 (unreleased)
+4.3.1 (2017-09-01)
 ==================
 
 - Fix running ``configure.zcml`` when ``zope.security`` is installed.
