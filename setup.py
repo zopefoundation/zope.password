@@ -29,6 +29,7 @@ BCRYPT_REQUIRES = [
 ]
 
 TESTS_REQUIRE = VOCABULARY_REQUIRES + BCRYPT_REQUIRES + [
+    'zope.security',
     'zope.testing',
     'zope.testrunner',
 ]

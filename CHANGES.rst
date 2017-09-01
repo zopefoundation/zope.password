@@ -5,7 +5,9 @@
 4.3.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Fix running ``configure.zcml`` when ``zope.security`` is installed.
+  See `issue 15
+  <https://github.com/zopefoundation/zope.password/issues/15>`_.
 
 
 4.3.0 (2017-08-31)

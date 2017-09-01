@@ -79,6 +79,7 @@
       />
 
   <configure zcml:condition="installed zope.security">
+    <include package="zope.security" file="meta.zcml" />
 
     <class class=".password.PlainTextPasswordManager">
       <allow interface=".interfaces.IMatchingPasswordManager" />
