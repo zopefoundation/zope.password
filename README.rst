@@ -10,8 +10,8 @@
         :target: https://pypi.org/project/zope.password/
         :alt: Supported Python versions
 
-.. image:: https://travis-ci.org/zopefoundation/zope.password.svg?branch=master
-        :target: https://travis-ci.org/zopefoundation/zope.password
+.. image:: https://travis-ci.com/zopefoundation/zope.password.svg?branch=master
+        :target: https://travis-ci.com/zopefoundation/zope.password
 
 .. image:: https://coveralls.io/repos/github/zopefoundation/zope.password/badge.svg?branch=master
         :target: https://coveralls.io/github/zopefoundation/zope.password?branch=master
