@@ -18,6 +18,7 @@ __docformat__ = "reStructuredText"
 import zope.password
 from zope.configuration import xmlconfig
 
+
 def setUpPasswordManagers():
     """Helper function for setting up password manager utilities for tests
 

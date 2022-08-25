@@ -17,6 +17,7 @@ __docformat__ = 'restructuredtext'
 import sys
 from codecs import getencoder
 
+
 try:
     from crypt import crypt
     from random import choice
@@ -26,6 +27,7 @@ except ImportError: # pragma: no cover
 
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
+
 
 _encoder = getencoder("utf-8")
 

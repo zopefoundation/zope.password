@@ -22,8 +22,8 @@ import bcrypt
 
 from zope.component.testing import PlacelessSetup
 from zope.interface.verify import verifyObject
-
 from zope.password.interfaces import IMatchingPasswordManager
+
 
 text_type = str if bytes is not str else unicode
 
@@ -145,14 +145,14 @@ class TestConfiguration(PlacelessSetup,
                         unittest.TestCase):
 
     def setUp(self):
-        from zope.configuration import xmlconfig
         import zope.password
+        from zope.configuration import xmlconfig
         xmlconfig.file('configure.zcml', zope.password)
 
     def test_crypt_utility_names(self):
-        from zope.password.password import BCRYPTPasswordManager
-        from zope.password.interfaces import IPasswordManager
         from zope import component
+        from zope.password.interfaces import IPasswordManager
+        from zope.password.password import BCRYPTPasswordManager
 
         self.assertIsInstance(component.getUtility(IPasswordManager, 'BCRYPT'),
                               BCRYPTPasswordManager)
@@ -162,7 +162,8 @@ class TestConfiguration(PlacelessSetup,
 
 
 def test_suite():
-    from zope.component.testing import setUp, tearDown
+    from zope.component.testing import setUp
+    from zope.component.testing import tearDown
     suite = unittest.TestSuite((
         doctest.DocTestSuite(
             'zope.password.password',

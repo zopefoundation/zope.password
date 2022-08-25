@@ -15,6 +15,7 @@
 """
 import zope.interface
 
+
 class IPasswordManager(zope.interface.Interface):
     """Password manager utility interface.
     """

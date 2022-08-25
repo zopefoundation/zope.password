@@ -14,12 +14,14 @@
 """Implementation of the zpasswd script.
 """
 from __future__ import print_function
+
 import argparse
 import os
 import sys
 from xml.sax.saxutils import quoteattr
 
 import pkg_resources
+
 
 VERSION = pkg_resources.get_distribution('zope.password').version
 
@@ -252,8 +254,8 @@ def get_password_managers(config_path=None):
     managers = default_managers
 
     if config_path:
-        from zope.configuration import xmlconfig
         from zope.component import getUtilitiesFor
+        from zope.configuration import xmlconfig
         from zope.password.interfaces import IPasswordManager
 
         print("Loading configuration...")

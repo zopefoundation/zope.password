@@ -15,18 +15,18 @@
 """
 __docformat__ = 'restructuredtext'
 
+import re
 from base64 import standard_b64decode
 from base64 import standard_b64encode
 from base64 import urlsafe_b64decode
 from base64 import urlsafe_b64encode
 from binascii import a2b_hex
 from codecs import getencoder
-from hashlib import md5, sha1
+from hashlib import md5
+from hashlib import sha1
+from hmac import compare_digest as _timing_safe_compare
 from os import urandom
 
-import re
-
-from hmac import compare_digest as _timing_safe_compare
 
 try:
     import bcrypt
@@ -35,6 +35,7 @@ except ImportError: # pragma: no cover
 
 from zope.interface import implementer
 from zope.password.interfaces import IMatchingPasswordManager
+
 
 _enc = getencoder("utf-8")
 

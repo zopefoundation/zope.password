@@ -15,14 +15,14 @@
 """
 import contextlib
 import doctest
+import io
 import os
 import sys
 import tempfile
 import unittest
 
-import io
-
-from zope.password import password, zpasswd
+from zope.password import password
+from zope.password import zpasswd
 
 
 class TestBase(unittest.TestCase):
