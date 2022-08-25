@@ -31,98 +31,99 @@ _encoder = getencoder("utf-8")
 
 PY2 = sys.version_info[0] == 2
 
+if crypt is not None:
+    @implementer(IMatchingPasswordManager)
+    class CryptPasswordManager(object):
+        """Crypt password manager.
 
-@implementer(IMatchingPasswordManager)
-class CryptPasswordManager(object):
-    """Crypt password manager.
+        Implements a UNIX crypt(3) hashing scheme. Note that crypt is
+        considered far inferior to more modern schemes such as SSHA hashing,
+        and only uses the first 8 characters of a password.
 
-    Implements a UNIX crypt(3) hashing scheme. Note that crypt is
-    considered far inferior to more modern schemes such as SSHA hashing,
-    and only uses the first 8 characters of a password.
+        >>> from zope.interface.verify import verifyObject
+        >>> from zope.password.interfaces import IMatchingPasswordManager
+        >>> from zope.password.legacy import CryptPasswordManager
 
-    >>> from zope.interface.verify import verifyObject
-    >>> from zope.password.interfaces import IMatchingPasswordManager
-    >>> from zope.password.legacy import CryptPasswordManager
+        >>> manager = CryptPasswordManager()
+        >>> verifyObject(IMatchingPasswordManager, manager)
+        True
 
-    >>> manager = CryptPasswordManager()
-    >>> verifyObject(IMatchingPasswordManager, manager)
-    True
+        >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+        >>> encoded = manager.encodePassword(password, salt="..")
+        >>> encoded
+        '{CRYPT}..I1I8wps4Na2'
+        >>> manager.match(encoded)
+        True
+        >>> manager.checkPassword(encoded, password)
+        True
 
-    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    >>> encoded = manager.encodePassword(password, salt="..")
-    >>> encoded
-    '{CRYPT}..I1I8wps4Na2'
-    >>> manager.match(encoded)
-    True
-    >>> manager.checkPassword(encoded, password)
-    True
+        Note that this object fails to return bytes from the ``encodePassword``
+        function on Python 3:
 
-    Note that this object fails to return bytes from the ``encodePassword``
-    function on Python 3:
+        >>> isinstance(encoded, str)
+        True
 
-    >>> isinstance(encoded, str)
-    True
+        Unfortunately, crypt only looks at the first 8 characters, so matching
+        against an 8 character password plus suffix always matches. Our test
+        password (including utf-8 encoding) is exactly 8 characters long, and
+        thus affixing 'wrong' to it tests as a correct password:
 
-    Unfortunately, crypt only looks at the first 8 characters, so matching
-    against an 8 character password plus suffix always matches. Our test
-    password (including utf-8 encoding) is exactly 8 characters long, and
-    thus affixing 'wrong' to it tests as a correct password:
+        >>> manager.checkPassword(encoded, password + u"wrong")
+        True
 
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    True
+        Using a completely different password is rejected as expected:
 
-    Using a completely different password is rejected as expected:
+        >>> manager.checkPassword(encoded, 'completely wrong')
+        False
 
-    >>> manager.checkPassword(encoded, 'completely wrong')
-    False
+        Using the `openssl passwd` command-line utility to encode ``secret``,
+        we get ``erz50QD3gv4Dw`` as seeded hash.
 
-    Using the `openssl passwd` command-line utility to encode ``secret``,
-    we get ``erz50QD3gv4Dw`` as seeded hash.
+        Our password manager generates the same value when seeded with the
+        same salt, so we can be sure, our output is compatible with
+        standard LDAP tools that also use crypt:
 
-    Our password manager generates the same value when seeded with the
-    same salt, so we can be sure, our output is compatible with
-    standard LDAP tools that also use crypt:
+        >>> salt = 'er'
+        >>> password = 'secret'
+        >>> encoded = manager.encodePassword(password, salt)
+        >>> encoded
+        '{CRYPT}erz50QD3gv4Dw'
 
-    >>> salt = 'er'
-    >>> password = 'secret'
-    >>> encoded = manager.encodePassword(password, salt)
-    >>> encoded
-    '{CRYPT}erz50QD3gv4Dw'
+        >>> manager.checkPassword(encoded, password)
+        True
+        >>> manager.checkPassword(encoded, password + u"wrong")
+        False
 
-    >>> manager.checkPassword(encoded, password)
-    True
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    False
+        >>> manager.encodePassword(password) != manager.encodePassword(
+        ...     password)
+        True
 
-    >>> manager.encodePassword(password) != manager.encodePassword(password)
-    True
+        The manager only claims to implement CRYPT encodings, anything not
+        starting with the string {CRYPT} returns False:
 
-    The manager only claims to implement CRYPT encodings, anything not
-    starting with the string {CRYPT} returns False:
+        >>> manager.match('{MD5}someotherhash')
+        False
 
-    >>> manager.match('{MD5}someotherhash')
-    False
-
-    """
+        """
 
 
-    def encodePassword(self, password, salt=None):
-        if salt is None:
-            choices = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                       "abcdefghijklmnopqrstuvwxyz"
-                       "0123456789./")
-            salt = choice(choices) + choice(choices)
-        if PY2:
-            # Py3: Python 2 can only handle ASCII for crypt.
-            password = _encoder(password)[0]
-        return '{CRYPT}%s' % crypt(password, salt)
+        def encodePassword(self, password, salt=None):
+            if salt is None:
+                choices = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "abcdefghijklmnopqrstuvwxyz"
+                        "0123456789./")
+                salt = choice(choices) + choice(choices)
+            if PY2:
+                # Py3: Python 2 can only handle ASCII for crypt.
+                password = _encoder(password)[0]
+            return '{CRYPT}%s' % crypt(password, salt)
 
-    def checkPassword(self, encoded_password, password):
-        return encoded_password == self.encodePassword(password,
-                                                       encoded_password[7:9])
+        def checkPassword(self, encoded_password, password):
+            return encoded_password == self.encodePassword(password,
+                                                        encoded_password[7:9])
 
-    def match(self, encoded_password):
-        return encoded_password.startswith('{CRYPT}')
+        def match(self, encoded_password):
+            return encoded_password.startswith('{CRYPT}')
 
 
 @implementer(IMatchingPasswordManager)
