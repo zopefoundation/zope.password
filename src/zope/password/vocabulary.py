@@ -17,10 +17,11 @@ For use with zope.component and zope.schema.
 """
 from zope.component import getUtilitiesFor
 from zope.interface import directlyProvides
-from zope.password.interfaces import IPasswordManager
 from zope.schema.interfaces import IVocabularyFactory
 from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
+
+from zope.password.interfaces import IPasswordManager
 
 
 def PasswordManagerNamesVocabulary(context=None):
@@ -30,5 +31,6 @@ def PasswordManagerNamesVocabulary(context=None):
     for name, util in getUtilitiesFor(IPasswordManager, context):
         terms.append(SimpleTerm(name))
     return SimpleVocabulary(terms)
+
 
 directlyProvides(PasswordManagerNamesVocabulary, IVocabularyFactory)

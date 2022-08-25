@@ -25,6 +25,7 @@ import pkg_resources
 
 VERSION = pkg_resources.get_distribution('zope.password').version
 
+
 def main(argv=None, app_factory=None):
     """Top-level script function to create a new principals."""
     argv = sys.argv if argv is None else argv
@@ -38,6 +39,7 @@ def main(argv=None, app_factory=None):
 
     return run_app_with_options(options, app_factory)
 
+
 def run_app_with_options(options, app_factory=None):
     app = Application if app_factory is None else app_factory
     app = app(options)
@@ -47,6 +49,7 @@ def run_app_with_options(options, app_factory=None):
         return 1
     except SystemExit as e:
         return e.code
+
 
 class Principal(object):
     """Principal.
@@ -89,7 +92,7 @@ class Principal(object):
             '    title=%s' % quoteattr(self.title),
             '    login=%s' % quoteattr(self.login),
             '    password=%s' % quoteattr(self.password.decode())
-            ]
+        ]
         if self.description:
             lines.append('    description=%s' % quoteattr(self.description))
         if self.password_manager_name != "Plain Text":
@@ -100,6 +103,7 @@ class Principal(object):
 
     def __str__(self):
         return "\n".join(self.getLines())
+
 
 TITLE = """
 ============================================
@@ -126,6 +130,7 @@ DESCRIPTION_TITLE = """
 Please provide an optional description for the principal.
 """
 
+
 class Application(object):
 
     title = TITLE
@@ -141,7 +146,7 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        read = raw_input if bytes is str else input
+        read = raw_input if bytes is str else input  # noqa: F821 undefined PY2
         return read(prompt)
 
     def read_password(self, prompt):
@@ -248,6 +253,7 @@ class Application(object):
             self.need_blank_line = False
         print(message)
 
+
 def get_password_managers(config_path=None):
     from zope.password.password import managers as default_managers
 
@@ -256,6 +262,7 @@ def get_password_managers(config_path=None):
     if config_path:
         from zope.component import getUtilitiesFor
         from zope.configuration import xmlconfig
+
         from zope.password.interfaces import IPasswordManager
 
         print("Loading configuration...")
@@ -269,13 +276,18 @@ def get_password_managers(config_path=None):
 
     return managers or default_managers
 
+
 def parse_args(argv):
     """Parse the command line, returning an object representing the input."""
     prog = os.path.split(os.path.realpath(argv[0]))[1]
     p = argparse.ArgumentParser(prog=prog)
-    p.add_argument("-c", "--config", dest="config", metavar="FILE",
-                   help=("path to the site.zcml configuration file"
-                         " (more accurate but slow password managers registry creation)"))
+    p.add_argument(
+        "-c",
+        "--config",
+        dest="config",
+        metavar="FILE",
+        help=("path to the site.zcml configuration file"
+              " (more accurate but slow password managers registry creation)"))
     p.add_argument("-o", "--output", dest="destination", metavar="FILE",
                    help=("the file in which the output will be saved"
                          " (STDOUT by default)"),

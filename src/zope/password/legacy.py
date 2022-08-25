@@ -21,11 +21,12 @@ from codecs import getencoder
 try:
     from crypt import crypt
     from random import choice
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     # The crypt module is not universally available, apparently
     crypt = None
 
 from zope.interface import implementer
+
 from zope.password.interfaces import IMatchingPasswordManager
 
 
@@ -108,12 +109,11 @@ if crypt is not None:
 
         """
 
-
         def encodePassword(self, password, salt=None):
             if salt is None:
                 choices = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        "abcdefghijklmnopqrstuvwxyz"
-                        "0123456789./")
+                           "abcdefghijklmnopqrstuvwxyz"
+                           "0123456789./")
                 salt = choice(choices) + choice(choices)
             if PY2:
                 # Py3: Python 2 can only handle ASCII for crypt.
@@ -121,8 +121,8 @@ if crypt is not None:
             return '{CRYPT}%s' % crypt(password, salt)
 
         def checkPassword(self, encoded_password, password):
-            return encoded_password == self.encodePassword(password,
-                                                        encoded_password[7:9])
+            return encoded_password == self.encodePassword(
+                password, encoded_password[7:9])
 
         def match(self, encoded_password):
             return encoded_password.startswith('{CRYPT}')
@@ -133,8 +133,8 @@ class MySQLPasswordManager(object):
     """A MySQL digest manager.
 
     This Password Manager implements the digest scheme as implemented in the
-    MySQL PASSWORD function in MySQL versions before 4.1. Note that this
-    method results in a very weak 16-byte hash.
+    MySQL PASSWORD function in MySQL versions before 4.1. Note that this method
+    results in a very weak 16-byte hash.
 
     >>> from zope.interface.verify import verifyObject
     >>> from zope.password.interfaces import IMatchingPasswordManager
@@ -161,12 +161,13 @@ class MySQLPasswordManager(object):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    Using the password 'PHP & Information Security' should result in the
-    hash ``379693e271cd3bd6``, according to
+    Using the password 'PHP & Information Security' should result in the hash
+    ``379693e271cd3bd6``, according to
     http://phpsec.org/articles/2005/password-hashing.html
 
-    Our password manager generates the same value when seeded with the same seed, so we
-    can be sure, our output is compatible with MySQL versions before 4.1:
+    Our password manager generates the same value when seeded with the same
+    seed, so we can be sure, our output is compatible with MySQL versions
+    before 4.1:
 
     >>> password = 'PHP & Information Security'
     >>> encoded = manager.encodePassword(password)
@@ -180,8 +181,8 @@ class MySQLPasswordManager(object):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    The manager only claims to implement MYSQL encodings, anything not
-    starting with the string {MYSQL} returns False:
+    The manager only claims to implement MYSQL encodings, anything not starting
+    with the string {MYSQL} returns False:
 
     >>> manager.match('{MD5}someotherhash')
     False
@@ -196,7 +197,6 @@ class MySQLPasswordManager(object):
     {MYSQL}75818366052c6a78
     """
 
-
     def encodePassword(self, password):
         nr = 1345345333
         add = 7
@@ -206,7 +206,8 @@ class MySQLPasswordManager(object):
                 # In Python 2 bytes iterate over single-char strings.
                 i = ord(i)
             if i == ord(b' ') or i == ord(b'\t'):
-                continue # pragma: no cover (this is actually hit, but coverage isn't reporting it)
+                continue  # pragma: no cover (this is actually hit, but ...
+                # coverage isn't reporting it)
             nr ^= (((nr & 63) + add) * i) + (nr << 8)
             nr2 += (nr2 << 8) ^ nr
             add += i
