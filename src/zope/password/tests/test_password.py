@@ -19,13 +19,13 @@ import doctest
 import unittest
 
 import bcrypt
-
 from zope.component.testing import PlacelessSetup
 from zope.interface.verify import verifyObject
 
 from zope.password.interfaces import IMatchingPasswordManager
 
-text_type = str if bytes is not str else unicode
+
+text_type = str if bytes is not str else unicode  # noqa: F821 undefined PY2
 
 
 class TestBCRYPTPasswordManager(unittest.TestCase):
@@ -122,8 +122,8 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
 class TestZ3cBcryptCompatible(unittest.TestCase):
 
     password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    z3c_encoded = b'$2a$10$dzfwtSW1sFx5Q.9/8.3dzOyvIBz6xu4Y00kJWZpOrQ1eH4amFtHP6'
-
+    z3c_encoded = (
+        b'$2a$10$dzfwtSW1sFx5Q.9/8.3dzOyvIBz6xu4Y00kJWZpOrQ1eH4amFtHP6')
 
     def _make_one(self):
         from zope.password.password import BCRYPTPasswordManager
@@ -146,13 +146,14 @@ class TestConfiguration(PlacelessSetup,
 
     def setUp(self):
         from zope.configuration import xmlconfig
+
         import zope.password
         xmlconfig.file('configure.zcml', zope.password)
 
     def test_crypt_utility_names(self):
-        from zope.password.password import BCRYPTPasswordManager
-        from zope.password.interfaces import IPasswordManager
         from zope import component
+        from zope.password.interfaces import IPasswordManager
+        from zope.password.password import BCRYPTPasswordManager
 
         self.assertIsInstance(component.getUtility(IPasswordManager, 'BCRYPT'),
                               BCRYPTPasswordManager)
@@ -160,9 +161,9 @@ class TestConfiguration(PlacelessSetup,
                               BCRYPTPasswordManager)
 
 
-
 def test_suite():
-    from zope.component.testing import setUp, tearDown
+    from zope.component.testing import setUp
+    from zope.component.testing import tearDown
     suite = unittest.TestSuite((
         doctest.DocTestSuite(
             'zope.password.password',

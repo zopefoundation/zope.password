@@ -17,112 +17,115 @@ __docformat__ = 'restructuredtext'
 import sys
 from codecs import getencoder
 
+
 try:
     from crypt import crypt
     from random import choice
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     # The crypt module is not universally available, apparently
     crypt = None
 
 from zope.interface import implementer
+
 from zope.password.interfaces import IMatchingPasswordManager
+
 
 _encoder = getencoder("utf-8")
 
 PY2 = sys.version_info[0] == 2
 
+if crypt is not None:
+    @implementer(IMatchingPasswordManager)
+    class CryptPasswordManager(object):
+        """Crypt password manager.
 
-@implementer(IMatchingPasswordManager)
-class CryptPasswordManager(object):
-    """Crypt password manager.
+        Implements a UNIX crypt(3) hashing scheme. Note that crypt is
+        considered far inferior to more modern schemes such as SSHA hashing,
+        and only uses the first 8 characters of a password.
 
-    Implements a UNIX crypt(3) hashing scheme. Note that crypt is
-    considered far inferior to more modern schemes such as SSHA hashing,
-    and only uses the first 8 characters of a password.
+        >>> from zope.interface.verify import verifyObject
+        >>> from zope.password.interfaces import IMatchingPasswordManager
+        >>> from zope.password.legacy import CryptPasswordManager
 
-    >>> from zope.interface.verify import verifyObject
-    >>> from zope.password.interfaces import IMatchingPasswordManager
-    >>> from zope.password.legacy import CryptPasswordManager
+        >>> manager = CryptPasswordManager()
+        >>> verifyObject(IMatchingPasswordManager, manager)
+        True
 
-    >>> manager = CryptPasswordManager()
-    >>> verifyObject(IMatchingPasswordManager, manager)
-    True
+        >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+        >>> encoded = manager.encodePassword(password, salt="..")
+        >>> encoded
+        '{CRYPT}..I1I8wps4Na2'
+        >>> manager.match(encoded)
+        True
+        >>> manager.checkPassword(encoded, password)
+        True
 
-    >>> password = u"right \N{CYRILLIC CAPITAL LETTER A}"
-    >>> encoded = manager.encodePassword(password, salt="..")
-    >>> encoded
-    '{CRYPT}..I1I8wps4Na2'
-    >>> manager.match(encoded)
-    True
-    >>> manager.checkPassword(encoded, password)
-    True
+        Note that this object fails to return bytes from the ``encodePassword``
+        function on Python 3:
 
-    Note that this object fails to return bytes from the ``encodePassword``
-    function on Python 3:
+        >>> isinstance(encoded, str)
+        True
 
-    >>> isinstance(encoded, str)
-    True
+        Unfortunately, crypt only looks at the first 8 characters, so matching
+        against an 8 character password plus suffix always matches. Our test
+        password (including utf-8 encoding) is exactly 8 characters long, and
+        thus affixing 'wrong' to it tests as a correct password:
 
-    Unfortunately, crypt only looks at the first 8 characters, so matching
-    against an 8 character password plus suffix always matches. Our test
-    password (including utf-8 encoding) is exactly 8 characters long, and
-    thus affixing 'wrong' to it tests as a correct password:
+        >>> manager.checkPassword(encoded, password + u"wrong")
+        True
 
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    True
+        Using a completely different password is rejected as expected:
 
-    Using a completely different password is rejected as expected:
+        >>> manager.checkPassword(encoded, 'completely wrong')
+        False
 
-    >>> manager.checkPassword(encoded, 'completely wrong')
-    False
+        Using the `openssl passwd` command-line utility to encode ``secret``,
+        we get ``erz50QD3gv4Dw`` as seeded hash.
 
-    Using the `openssl passwd` command-line utility to encode ``secret``,
-    we get ``erz50QD3gv4Dw`` as seeded hash.
+        Our password manager generates the same value when seeded with the
+        same salt, so we can be sure, our output is compatible with
+        standard LDAP tools that also use crypt:
 
-    Our password manager generates the same value when seeded with the
-    same salt, so we can be sure, our output is compatible with
-    standard LDAP tools that also use crypt:
+        >>> salt = 'er'
+        >>> password = 'secret'
+        >>> encoded = manager.encodePassword(password, salt)
+        >>> encoded
+        '{CRYPT}erz50QD3gv4Dw'
 
-    >>> salt = 'er'
-    >>> password = 'secret'
-    >>> encoded = manager.encodePassword(password, salt)
-    >>> encoded
-    '{CRYPT}erz50QD3gv4Dw'
+        >>> manager.checkPassword(encoded, password)
+        True
+        >>> manager.checkPassword(encoded, password + u"wrong")
+        False
 
-    >>> manager.checkPassword(encoded, password)
-    True
-    >>> manager.checkPassword(encoded, password + u"wrong")
-    False
+        >>> manager.encodePassword(password) != manager.encodePassword(
+        ...     password)
+        True
 
-    >>> manager.encodePassword(password) != manager.encodePassword(password)
-    True
+        The manager only claims to implement CRYPT encodings, anything not
+        starting with the string {CRYPT} returns False:
 
-    The manager only claims to implement CRYPT encodings, anything not
-    starting with the string {CRYPT} returns False:
+        >>> manager.match('{MD5}someotherhash')
+        False
 
-    >>> manager.match('{MD5}someotherhash')
-    False
+        """
 
-    """
+        def encodePassword(self, password, salt=None):
+            if salt is None:
+                choices = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyz"
+                           "0123456789./")
+                salt = choice(choices) + choice(choices)
+            if PY2:
+                # Py3: Python 2 can only handle ASCII for crypt.
+                password = _encoder(password)[0]
+            return '{CRYPT}%s' % crypt(password, salt)
 
+        def checkPassword(self, encoded_password, password):
+            return encoded_password == self.encodePassword(
+                password, encoded_password[7:9])
 
-    def encodePassword(self, password, salt=None):
-        if salt is None:
-            choices = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                       "abcdefghijklmnopqrstuvwxyz"
-                       "0123456789./")
-            salt = choice(choices) + choice(choices)
-        if PY2:
-            # Py3: Python 2 can only handle ASCII for crypt.
-            password = _encoder(password)[0]
-        return '{CRYPT}%s' % crypt(password, salt)
-
-    def checkPassword(self, encoded_password, password):
-        return encoded_password == self.encodePassword(password,
-                                                       encoded_password[7:9])
-
-    def match(self, encoded_password):
-        return encoded_password.startswith('{CRYPT}')
+        def match(self, encoded_password):
+            return encoded_password.startswith('{CRYPT}')
 
 
 @implementer(IMatchingPasswordManager)
@@ -130,8 +133,8 @@ class MySQLPasswordManager(object):
     """A MySQL digest manager.
 
     This Password Manager implements the digest scheme as implemented in the
-    MySQL PASSWORD function in MySQL versions before 4.1. Note that this
-    method results in a very weak 16-byte hash.
+    MySQL PASSWORD function in MySQL versions before 4.1. Note that this method
+    results in a very weak 16-byte hash.
 
     >>> from zope.interface.verify import verifyObject
     >>> from zope.password.interfaces import IMatchingPasswordManager
@@ -158,12 +161,13 @@ class MySQLPasswordManager(object):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    Using the password 'PHP & Information Security' should result in the
-    hash ``379693e271cd3bd6``, according to
+    Using the password 'PHP & Information Security' should result in the hash
+    ``379693e271cd3bd6``, according to
     http://phpsec.org/articles/2005/password-hashing.html
 
-    Our password manager generates the same value when seeded with the same seed, so we
-    can be sure, our output is compatible with MySQL versions before 4.1:
+    Our password manager generates the same value when seeded with the same
+    seed, so we can be sure, our output is compatible with MySQL versions
+    before 4.1:
 
     >>> password = 'PHP & Information Security'
     >>> encoded = manager.encodePassword(password)
@@ -177,8 +181,8 @@ class MySQLPasswordManager(object):
     >>> manager.checkPassword(encoded, password + u"wrong")
     False
 
-    The manager only claims to implement MYSQL encodings, anything not
-    starting with the string {MYSQL} returns False:
+    The manager only claims to implement MYSQL encodings, anything not starting
+    with the string {MYSQL} returns False:
 
     >>> manager.match('{MD5}someotherhash')
     False
@@ -193,7 +197,6 @@ class MySQLPasswordManager(object):
     {MYSQL}75818366052c6a78
     """
 
-
     def encodePassword(self, password):
         nr = 1345345333
         add = 7
@@ -203,7 +206,8 @@ class MySQLPasswordManager(object):
                 # In Python 2 bytes iterate over single-char strings.
                 i = ord(i)
             if i == ord(b' ') or i == ord(b'\t'):
-                continue # pragma: no cover (this is actually hit, but coverage isn't reporting it)
+                continue  # pragma: no cover (this is actually hit, but ...
+                # coverage isn't reporting it)
             nr ^= (((nr & 63) + add) * i) + (nr << 8)
             nr2 += (nr2 << 8) ^ nr
             add += i

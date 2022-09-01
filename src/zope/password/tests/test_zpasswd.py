@@ -15,14 +15,14 @@
 """
 import contextlib
 import doctest
+import io
 import os
 import sys
 import tempfile
 import unittest
 
-import io
-
-from zope.password import password, zpasswd
+from zope.password import password
+from zope.password import zpasswd
 
 
 class TestBase(unittest.TestCase):
@@ -156,6 +156,7 @@ class ArgumentParsingTestCase(TestBase):
             x = zpasswd.main(['foo/bar.py', '--no-such-argument'])
         self.assertEqual(x, 2)
 
+
 class ControlledInputApplication(zpasswd.Application):
 
     def __init__(self, options, input_lines):
@@ -170,6 +171,7 @@ class ControlledInputApplication(zpasswd.Application):
     def all_input_consumed(self):
         return not self.__input
 
+
 class Options(object):
 
     config = None
@@ -178,6 +180,7 @@ class Options(object):
 
     def __init__(self):
         self.destination = sys.stdout
+
 
 class InputCollectionTestCase(TestBase):
 
@@ -197,6 +200,7 @@ class InputCollectionTestCase(TestBase):
 
     def test_principal_information(self):
         apps = []
+
         def factory(options):
             app = ControlledInputApplication(
                 options,
@@ -279,7 +283,6 @@ class TestRunAndApplication(TestBase):
             x = zpasswd.Application(None).read_input_line("")
         self.assertEqual(x, "hi there")
 
-
     def test_get_value(self):
         # No error message
         with self.patched_stdio(input_data="\n"):
@@ -290,7 +293,6 @@ class TestRunAndApplication(TestBase):
         with self.patched_stdio(input_data="\nYup"):
             x = zpasswd.Application(None).get_value("", "", error="Error")
         self.assertEqual(x, "Yup")
-
 
     def test_read_password(self):
         with self.patched_getpass(lambda _prompt: sys.stdin.read()):
@@ -312,6 +314,7 @@ class TestRunAndApplication(TestBase):
     def test_get_passwd_empty(self):
         passwords = ['', 'abc', 'abc']
         passwords.reverse()
+
         def gp(_prompt):
             return passwords.pop()
 
@@ -325,6 +328,7 @@ class TestRunAndApplication(TestBase):
     def test_get_passwd_spaces(self):
         passwords = [' with spaces ', 'abc', 'abc']
         passwords.reverse()
+
         def gp(_prompt):
             return passwords.pop()
 
@@ -335,10 +339,10 @@ class TestRunAndApplication(TestBase):
         self.assertEqual(self.stderr.getvalue(),
                          "Password may not contain spaces\n")
 
-
     def test_get_passwd_verify_fail(self):
         passwords = ['abc', 'def']
         passwords.reverse()
+
         def gp(_prompt):
             return passwords.pop()
 
@@ -361,10 +365,8 @@ class TestRunAndApplication(TestBase):
         self.assertEqual(self.stderr.getvalue(),
                          'You must select a password manager\n')
 
+
 def test_suite():
     suite = doctest.DocTestSuite('zope.password.zpasswd')
     suite.addTest(unittest.defaultTestLoader.loadTestsFromName(__name__))
     return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

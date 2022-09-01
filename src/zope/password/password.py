@@ -15,28 +15,31 @@
 """
 __docformat__ = 'restructuredtext'
 
+import re
 from base64 import standard_b64decode
 from base64 import standard_b64encode
 from base64 import urlsafe_b64decode
 from base64 import urlsafe_b64encode
 from binascii import a2b_hex
 from codecs import getencoder
-from hashlib import md5, sha1
+from hashlib import md5
+from hashlib import sha1
+from hmac import compare_digest as _timing_safe_compare
 from os import urandom
 
-import re
-
-from hmac import compare_digest as _timing_safe_compare
 
 try:
     import bcrypt
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     bcrypt = None
 
 from zope.interface import implementer
+
 from zope.password.interfaces import IMatchingPasswordManager
 
+
 _enc = getencoder("utf-8")
+
 
 def _encoder(s):
     if isinstance(s, bytes):
@@ -75,7 +78,6 @@ class PlainTextPasswordManager(object):
     False
     """
 
-
     def encodePassword(self, password):
         password = _encoder(password)
         return password
@@ -91,6 +93,7 @@ class PlainTextPasswordManager(object):
         # SSHA hash.
         return False
 
+
 class _PrefixedPasswordManager(PlainTextPasswordManager):
 
     # The bytes prefix this object uses.
@@ -98,6 +101,7 @@ class _PrefixedPasswordManager(PlainTextPasswordManager):
 
     def match(self, encoded_password):
         return _encoder(encoded_password).startswith(self._prefix)
+
 
 class SSHAPasswordManager(_PrefixedPasswordManager):
     """SSHA password manager.
@@ -492,7 +496,8 @@ class SHA1PasswordManager(_PrefixedPasswordManager):
             return encoded == self.encodePassword(password)[5:]
         # Backwards compatible, hexdigest and no prefix
         encoded_password = standard_b64encode(a2b_hex(encoded_password[-40:]))
-        return _timing_safe_compare(encoded_password, self.encodePassword(password)[5:])
+        return _timing_safe_compare(
+            encoded_password, self.encodePassword(password)[5:])
 
     def match(self, encoded_password):
         encoded_password = _encoder(encoded_password)
@@ -543,7 +548,7 @@ class BCRYPTPasswordManager(_PrefixedPasswordManager):
 
         try:
             ok = bcrypt.checkpw(pw_bytes, pw_hash)
-        except ValueError: # pragma: no cover
+        except ValueError:  # pragma: no cover
             # invalid salt
             ok = False
         return ok
@@ -576,6 +581,7 @@ class BCRYPTPasswordManager(_PrefixedPasswordManager):
         hashed_password = _encoder(hashed_password)
         return (hashed_password.startswith(self._prefix)
                 or self._z3c_bcrypt_syntax.match(hashed_password) is not None)
+
 
 class BCRYPTKDFPasswordManager(_PrefixedPasswordManager):
     """

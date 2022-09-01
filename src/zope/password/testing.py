@@ -15,8 +15,10 @@
 """
 __docformat__ = "reStructuredText"
 
-import zope.password
 from zope.configuration import xmlconfig
+
+import zope.password
+
 
 def setUpPasswordManagers():
     """Helper function for setting up password manager utilities for tests
@@ -51,6 +53,7 @@ def setUpPasswordManagers():
     ... else:
     ...     from zope.password.legacy import CryptPasswordManager
     ...     getUtility(IMatchingPasswordManager, 'Crypt') is not None
+    ...     del crypt
     True
 
     >>> voc = getUtility(IVocabularyFactory, 'Password Manager Names')

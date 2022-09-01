@@ -15,6 +15,7 @@
 """
 import zope.interface
 
+
 class IPasswordManager(zope.interface.Interface):
     """Password manager utility interface.
     """
@@ -30,6 +31,7 @@ class IPasswordManager(zope.interface.Interface):
 
         Return True if they match, else False.
         """
+
 
 class IMatchingPasswordManager(IPasswordManager):
     """Password manager with hash matching support"""
