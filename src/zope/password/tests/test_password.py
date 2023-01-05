@@ -25,15 +25,12 @@ from zope.interface.verify import verifyObject
 from zope.password.interfaces import IMatchingPasswordManager
 
 
-text_type = str if bytes is not str else unicode  # noqa: F821 undefined PY2
-
-
 class TestBCRYPTPasswordManager(unittest.TestCase):
     """Tests for custom zope.password password manager."""
 
     password = (
-        u'Close \N{GREEK SMALL LETTER PHI}ncounterS 0f '
-        u'tHe Erd K1nd'
+        'Close \N{GREEK SMALL LETTER PHI}ncounterS 0f '
+        'tHe Erd K1nd'
     )
 
     def _make_one(self):
@@ -85,7 +82,7 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         salt = bcrypt.gensalt()
         # *handle* unicode salts (since all other encoding is handled)
         with self._encode_twice(pw_mgr,
-                                salt1=text_type(salt, 'utf-8'),
+                                salt1=str(salt, 'utf-8'),
                                 salt2=salt) as encoded_passwords:
             self.assertEqual(*encoded_passwords)
 
@@ -100,16 +97,16 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
         encoded = encoded[:-1]
         self.assertFalse(pw_mgr.checkPassword(encoded, self.password))
 
-        password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+        password = "right \N{CYRILLIC CAPITAL LETTER A}"
         encoded = pw_mgr.encodePassword(password)
         self.assertTrue(pw_mgr.checkPassword(encoded, password))
-        self.assertFalse(pw_mgr.checkPassword(encoded, password + u"wrong"))
+        self.assertFalse(pw_mgr.checkPassword(encoded, password + "wrong"))
 
         # Subsequently hashing the same password will produce a
         # different encoding
         encoded2 = pw_mgr.encodePassword(password)
         self.assertNotEqual(encoded2, encoded)
-        self.assertFalse(pw_mgr.checkPassword(encoded2, password + u"wrong"))
+        self.assertFalse(pw_mgr.checkPassword(encoded2, password + "wrong"))
         self.assertTrue(pw_mgr.checkPassword(encoded, password))
         self.assertTrue(pw_mgr.checkPassword(encoded2, password))
 
@@ -121,7 +118,7 @@ class TestBCRYPTPasswordManager(unittest.TestCase):
 
 class TestZ3cBcryptCompatible(unittest.TestCase):
 
-    password = u"right \N{CYRILLIC CAPITAL LETTER A}"
+    password = "right \N{CYRILLIC CAPITAL LETTER A}"
     z3c_encoded = (
         b'$2a$10$dzfwtSW1sFx5Q.9/8.3dzOyvIBz6xu4Y00kJWZpOrQ1eH4amFtHP6')
 
