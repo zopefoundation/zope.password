@@ -13,7 +13,6 @@
 ##############################################################################
 """Implementation of the zpasswd script.
 """
-from __future__ import print_function
 
 import argparse
 import os
@@ -51,7 +50,7 @@ def run_app_with_options(options, app_factory=None):
         return e.code
 
 
-class Principal(object):
+class Principal:
     """Principal.
 
     >>> principal = Principal("id", u"title", u"login", b"password")
@@ -131,7 +130,7 @@ Please provide an optional description for the principal.
 """
 
 
-class Application(object):
+class Application:
 
     title = TITLE
     id_title = ID_TITLE
@@ -146,8 +145,7 @@ class Application(object):
 
     def read_input_line(self, prompt):
         # The tests replace this to make sure the right things happen.
-        read = raw_input if bytes is str else input  # noqa: F821 undefined PY2
-        return read(prompt)
+        return input(prompt)
 
     def read_password(self, prompt):
         # The tests replace this to make sure the right things happen.

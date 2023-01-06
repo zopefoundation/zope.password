@@ -48,7 +48,7 @@ def _encoder(s):
 
 
 @implementer(IMatchingPasswordManager)
-class PlainTextPasswordManager(object):
+class PlainTextPasswordManager:
     """Plain text password manager.
 
     >>> from zope.interface.verify import verifyObject

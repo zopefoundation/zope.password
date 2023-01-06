@@ -113,8 +113,7 @@ class ArgumentParsingTestCase(TestBase):
         self.assertIs(options.destination, self.stdout)
 
     def test_version_long(self):
-        self.check_stdout_content(["--version"],
-                                  stderr=sys.version_info[0] == 2)
+        self.check_stdout_content(["--version"], stderr=False)
 
     def test_help_long(self):
         self.check_stdout_content(["--help"])
@@ -160,7 +159,7 @@ class ArgumentParsingTestCase(TestBase):
 class ControlledInputApplication(zpasswd.Application):
 
     def __init__(self, options, input_lines):
-        super(ControlledInputApplication, self).__init__(options)
+        super().__init__(options)
         self.__input = input_lines
 
     def read_input_line(self, prompt):
@@ -172,7 +171,7 @@ class ControlledInputApplication(zpasswd.Application):
         return not self.__input
 
 
-class Options(object):
+class Options:
 
     config = None
     program = "[test-program]"
@@ -204,8 +203,8 @@ class InputCollectionTestCase(TestBase):
         def factory(options):
             app = ControlledInputApplication(
                 options,
-                ["id", u"title", u"login", u"1",
-                 u"passwd", u"passwd", u"description"])
+                ["id", "title", "login", "1",
+                 "passwd", "passwd", "description"])
             apps.append(app)
             return app
         with self.patched_stdio():
@@ -245,7 +244,7 @@ class TestDestination(InputCollectionTestCase):
 class TestRunAndApplication(TestBase):
 
     def test_keyboard_interrupt(self):
-        class App(object):
+        class App:
             def __init__(self, options):
                 self.options = options
 
@@ -257,7 +256,7 @@ class TestRunAndApplication(TestBase):
         self.assertEqual(x, 1)
 
     def test_exit(self):
-        class App(object):
+        class App:
             def __init__(self, options):
                 self.options = options
 

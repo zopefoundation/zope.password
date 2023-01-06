@@ -13,8 +13,6 @@
 ##############################################################################
 """Legacy password managers, using now-outdated, insecure methods for hashing
 """
-__docformat__ = 'restructuredtext'
-import sys
 from codecs import getencoder
 
 
@@ -32,11 +30,9 @@ from zope.password.interfaces import IMatchingPasswordManager
 
 _encoder = getencoder("utf-8")
 
-PY2 = sys.version_info[0] == 2
-
 if crypt is not None:
     @implementer(IMatchingPasswordManager)
-    class CryptPasswordManager(object):
+    class CryptPasswordManager:
         """Crypt password manager.
 
         Implements a UNIX crypt(3) hashing scheme. Note that crypt is
@@ -61,7 +57,7 @@ if crypt is not None:
         True
 
         Note that this object fails to return bytes from the ``encodePassword``
-        function on Python 3:
+        function:
 
         >>> isinstance(encoded, str)
         True
@@ -115,9 +111,6 @@ if crypt is not None:
                            "abcdefghijklmnopqrstuvwxyz"
                            "0123456789./")
                 salt = choice(choices) + choice(choices)
-            if PY2:
-                # Py3: Python 2 can only handle ASCII for crypt.
-                password = _encoder(password)[0]
             return '{CRYPT}%s' % crypt(password, salt)
 
         def checkPassword(self, encoded_password, password):
@@ -129,7 +122,7 @@ if crypt is not None:
 
 
 @implementer(IMatchingPasswordManager)
-class MySQLPasswordManager(object):
+class MySQLPasswordManager:
     """A MySQL digest manager.
 
     This Password Manager implements the digest scheme as implemented in the
@@ -202,9 +195,6 @@ class MySQLPasswordManager(object):
         add = 7
         nr2 = 0x12345671
         for i in _encoder(password)[0]:
-            if PY2:
-                # In Python 2 bytes iterate over single-char strings.
-                i = ord(i)
             if i == ord(b' ') or i == ord(b'\t'):
                 continue  # pragma: no cover (this is actually hit, but ...
                 # coverage isn't reporting it)
@@ -213,7 +203,7 @@ class MySQLPasswordManager(object):
             add += i
         r0 = nr & ((1 << 31) - 1)
         r1 = nr2 & ((1 << 31) - 1)
-        return ("{MYSQL}%08lx%08lx" % (r0, r1)).encode()
+        return ("{{MYSQL}}{:08x}{:08x}".format(r0, r1)).encode()
 
     def checkPassword(self, encoded_password, password):
         if not isinstance(encoded_password, bytes):
