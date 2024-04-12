@@ -20,7 +20,7 @@
         :target: https://zopepassword.readthedocs.io/en/latest/
         :alt: Documentation Status
 
-This package provides a password manager mechanism. Password manager
+This package provides a password manager mechanism. The password manager
 is an utility object that can encode and check encoded
 passwords.
 
