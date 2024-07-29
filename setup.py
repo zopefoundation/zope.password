@@ -88,7 +88,6 @@ setup(name='zope.password',
           'zope.configuration',
           'zope.interface',
       ],
-      tests_require=TESTS_REQUIRE,
       include_package_data=True,
       zip_safe=False,
       entry_points="""
