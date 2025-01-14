@@ -41,7 +41,7 @@ TESTS_REQUIRE = VOCABULARY_REQUIRES + BCRYPT_REQUIRES + [
 setup(name='zope.password',
       version='6.0.dev0',
       author='Zope Foundation and Contributors',
-      author_email='zope-dev@zope.org',
+      author_email='zope-dev@zope.dev',
       description='Password encoding and checking utilities',
       long_description=(
           read('README.rst')
