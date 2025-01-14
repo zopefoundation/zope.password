@@ -39,7 +39,7 @@ TESTS_REQUIRE = VOCABULARY_REQUIRES + BCRYPT_REQUIRES + [
 ]
 
 setup(name='zope.password',
-      version='6.0',
+      version='6.1.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.dev',
       description='Password encoding and checking utilities',
