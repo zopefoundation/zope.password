@@ -30,7 +30,7 @@ from os import urandom
 
 try:
     import bcrypt
-except ImportError:  # pragma: no cover
+except ModuleNotFoundError:  # pragma: no cover
     bcrypt = None
 
 from zope.interface import implementer

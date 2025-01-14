@@ -105,7 +105,7 @@ class MySQLPasswordManager:
             add += i
         r0 = nr & ((1 << 31) - 1)
         r1 = nr2 & ((1 << 31) - 1)
-        return ("{{MYSQL}}{:08x}{:08x}".format(r0, r1)).encode()
+        return (f"{{MYSQL}}{r0:08x}{r1:08x}").encode()
 
     def checkPassword(self, encoded_password, password):
         if not isinstance(encoded_password, bytes):
