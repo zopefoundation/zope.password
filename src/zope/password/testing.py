@@ -47,7 +47,7 @@ def setUpPasswordManagers():
 
     >>> try:
     ...     import crypt
-    ... except ImportError:
+    ... except ModuleNotFoundError:
     ...     CryptPasswordManager = None
     ...     True
     ... else:
