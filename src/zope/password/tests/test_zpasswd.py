@@ -50,9 +50,8 @@ class TestBase(unittest.TestCase):
 
     @contextlib.contextmanager
     def patched_stdio(self, input_data=None):
-        io_type = io.StringIO if bytes is not str else io.BytesIO
-        self.stdout = io_type()
-        self.stderr = io_type()
+        self.stdout = io.StringIO()
+        self.stderr = io.StringIO()
 
         self.old_stdout = sys.stdout
         self.old_stderr = sys.stderr
@@ -61,7 +60,7 @@ class TestBase(unittest.TestCase):
         sys.stderr = self.stderr
 
         if input_data is not None:
-            self.stdin = io_type(input_data)
+            self.stdin = io.StringIO(input_data)
             sys.stdin = self.stdin
 
         try:
