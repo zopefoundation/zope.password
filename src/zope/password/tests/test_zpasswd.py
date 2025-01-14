@@ -126,7 +126,10 @@ class ArgumentParsingTestCase(TestBase):
         os.close(handle)
         self.addCleanup(os.remove, path)
         options = self.parse_args([option, path])
-        self.assertEqual(options.destination.name, path)
+        try:
+            self.assertEqual(options.destination.name, path)
+        finally:
+            options.destination.close()
 
     def test_destination_long(self):
         self.test_destination_short("--output")
