@@ -64,14 +64,6 @@
        />
   </configure>
 
-  <configure zcml:condition="installed crypt">
-    <utility
-        name="Crypt"
-        provides=".interfaces.IMatchingPasswordManager"
-        factory=".legacy.CryptPasswordManager"
-        />
-  </configure>
-
   <utility
       component=".vocabulary.PasswordManagerNamesVocabulary"
       provides="zope.schema.interfaces.IVocabularyFactory"
@@ -107,12 +99,6 @@
 
     <configure zcml:condition="installed bcrypt">
       <class class=".password.BCRYPTPasswordManager">
-        <allow interface=".interfaces.IMatchingPasswordManager" />
-      </class>
-    </configure>
-
-    <configure zcml:condition="installed crypt">
-      <class class=".legacy.CryptPasswordManager">
         <allow interface=".interfaces.IMatchingPasswordManager" />
       </class>
     </configure>

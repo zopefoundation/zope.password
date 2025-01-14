@@ -2,10 +2,11 @@
  Changes
 =========
 
-5.1 (unreleased)
+6.0 (unreleased)
 ================
 
-- Nothing changed yet.
+- Drop support for ``crypt`` password manager. Its base library is long
+  deprecated and was removed in Python 3.13.
 
 
 5.0 (2025-01-14)

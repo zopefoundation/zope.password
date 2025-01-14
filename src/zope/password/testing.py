@@ -45,17 +45,6 @@ def setUpPasswordManagers():
     >>> getUtility(IMatchingPasswordManager, 'MySQL')
     <zope.password.legacy.MySQLPasswordManager object at 0x...>
 
-    >>> try:
-    ...     import crypt
-    ... except ModuleNotFoundError:
-    ...     CryptPasswordManager = None
-    ...     True
-    ... else:
-    ...     from zope.password.legacy import CryptPasswordManager
-    ...     getUtility(IMatchingPasswordManager, 'Crypt') is not None
-    ...     del crypt
-    True
-
     >>> voc = getUtility(IVocabularyFactory, 'Password Manager Names')
     >>> voc = voc(None)
     >>> voc
@@ -75,9 +64,6 @@ def setUpPasswordManagers():
     >>> 'BCRYPT' in voc
     True
     >>> 'BCRYPTKDF' in voc
-    True
-
-    >>> CryptPasswordManager is None or 'Crypt' in voc
     True
 
     """

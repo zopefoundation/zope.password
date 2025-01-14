@@ -35,13 +35,6 @@ eight implementations:
    basically SHA1-encoding password manager which also incorporates a
    salt into the password when encoding it.
 
-:class:`zope.password.password.CryptPasswordManager`
-
-   A manager implementing the crypt(3) hashing scheme.  Only available if
-   the python crypt module is installed. This is a legacy manager, only
-   present to ensure that zope.password can be used for all schemes defined
-   in RFC 2307 (LDAP).
-
 :class:`zope.password.password.MySQLPasswordManager`
 
    A manager implementing the digest scheme as implemented in the MySQL
