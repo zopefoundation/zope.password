@@ -2,7 +2,7 @@
  Changes
 =========
 
-5.1 (unreleased)
+6.0 (unreleased)
 ================
 
 - Drop support for ``crypt`` password manager. Its base library is long
