@@ -15,7 +15,6 @@
 """
 import os
 
-from setuptools import find_packages
 from setuptools import setup
 
 
@@ -35,7 +34,7 @@ BCRYPT_REQUIRES = [
 TESTS_REQUIRE = VOCABULARY_REQUIRES + BCRYPT_REQUIRES + [
     'zope.security',
     'zope.testing',
-    'zope.testrunner',
+    'zope.testrunner >= 6.4',
 ]
 
 setup(name='zope.password',
@@ -70,8 +69,6 @@ setup(name='zope.password',
           'Framework :: Zope :: 3',
       ],
       keywords='zope authentication password zpasswd',
-      packages=find_packages('src'),
-      package_dir={'': 'src'},
       extras_require={
           'vocabulary': VOCABULARY_REQUIRES,
           'test': TESTS_REQUIRE,
@@ -81,7 +78,6 @@ setup(name='zope.password',
               'repoze.sphinx.autointerface',
           ]
       },
-      namespace_packages=['zope'],
       install_requires=[
           'setuptools',
           'zope.component',
