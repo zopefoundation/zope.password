@@ -49,7 +49,7 @@ setup(name='zope.password',
           read('CHANGES.rst')
       ),
       url='http://github.com/zopefoundation/zope.password',
-      license='ZPL 2.1',
+      license='ZPL-2.1',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
