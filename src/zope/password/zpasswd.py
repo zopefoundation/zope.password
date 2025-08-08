@@ -17,12 +17,11 @@
 import argparse
 import os
 import sys
+from importlib.metadata import version
 from xml.sax.saxutils import quoteattr
 
-import pkg_resources
 
-
-VERSION = pkg_resources.get_distribution('zope.password').version
+VERSION = version('zope.password')
 
 
 def main(argv=None, app_factory=None):
