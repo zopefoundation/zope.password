@@ -5,7 +5,7 @@
 6.1 (unreleased)
 ================
 
-- Nothing changed yet.
+- Replace deprecated pkg_resources with importlib metadata
 
 
 6.0 (2025-01-14)
