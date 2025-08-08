@@ -7,6 +7,8 @@
 
 - Replace ``pkg_resources`` namespace with PEP 420 native namespace.
 
+- Replace deprecated ``pkg_resources`` with ``importlib.metadata``.
+
 
 6.0 (2025-01-14)
 ================
