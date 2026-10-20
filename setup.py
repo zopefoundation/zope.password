@@ -86,9 +86,10 @@ setup(name='zope.password',
       ],
       include_package_data=True,
       zip_safe=False,
-      entry_points="""
-      [console_scripts]
-      zpasswd = zope.password.zpasswd:main
-      """,
+      entry_points={
+          'console_scripts': [
+              'zpasswd = zope.password.zpasswd:main',
+          ],
+      },
       python_requires='>=3.11',
       )
