@@ -7,6 +7,69 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+
+[project]
+name = "zope.password"
+version = "6.2.dev0"
+description = "Password encoding and checking utilities"
+license = "ZPL-2.1"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Framework :: Zope :: 3",
+]
+dynamic = ["readme"]
+requires-python = ">=3.11"
+authors = [
+    {name = "Zope Foundation and contributors",email = "zope-dev@zope.dev"},
+]
+maintainers = [
+    {name = "Plone Foundation and contributors",email = "zope-dev@zope.dev"},
+]
+dependencies = [
+    "zope.component",
+    "zope.configuration",
+    "zope.interface",
+]
+keywords = ["zope", "authentication", "password", "zpasswd"]
+
+[project.scripts]
+zpasswd = "zope.password.zpasswd:main"
+
+[project.optional-dependencies]
+vocabulary = ["zope.schema"]
+test = [
+    "zope.schema",
+    "bcrypt",
+    "zope.security",
+    "zope.testing",
+    "zope.testrunner >= 6.4",
+]
+bcrypt = ["bcrypt"]
+docs = [
+    "Sphinx",
+    "repoze.sphinx.autointerface",
+]
+
+[project.urls]
+Documentation = "https://zopepassword.readthedocs.io/"
+Source = "https://github.com/zopefoundation/zope.password"
+Issues = "https://github.com/zopefoundation/zope.password/issues"
+Changelog = "https://raw.githubusercontent.com/zopefoundation/zope.password/master/CHANGES.rst"
+
 [tool.coverage.run]
 branch = true
 source = ["zope.password"]
@@ -29,3 +92,6 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "parts/htmlcov"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst", "CHANGES.rst"]}
