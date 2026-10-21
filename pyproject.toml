@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zope.password"
-version = "6.2.dev0"
+version = "6.2"
 description = "Password encoding and checking utilities"
 license = "ZPL-2.1"
 classifiers = [
